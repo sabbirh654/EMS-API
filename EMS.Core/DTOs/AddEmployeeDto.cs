@@ -1,8 +1,7 @@
-﻿namespace EMS.Core.Entities;
+﻿namespace EMS.Core.DTOs;
 
-public class Employee
+public class AddEmployeeDto
 {
-    public int Id { get; set; }
     public string Name { get; set; }
     public string Email { get; set; }
     public string PhoneNumber { get; set; }

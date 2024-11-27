@@ -5,27 +5,27 @@ namespace EMS.Repository.Implementations;
 
 public class DesignationRepository : IDesignationRepository
 {
-    public Task<int> AddAsync(Designation entity)
+    public Task AddAsync(Designation entity)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteAsync(int id)
+    public Task DeleteAsync(int id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Designation>> GetAllAsync()
+    public Task<IEnumerable<Designation>?> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<Designation> GetByIdAsync(int id)
+    public Task<Designation?> GetByIdAsync(int id)
     {
         throw new NotImplementedException();
     }
 
-    public Task<bool> UpdateAsync(Designation entity)
+    public Task UpdateAsync(Designation entity)
     {
         throw new NotImplementedException();
     }

@@ -15,8 +15,4 @@
     <ProjectReference Include="..\EMS.Services\EMS.Services.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>
