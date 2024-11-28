@@ -8,23 +8,23 @@ namespace EMS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class DepartmentsController : ControllerBase
     {
-        private readonly IEmployeeService _employeeService;
+        private readonly IDepartmentService _departmentService;
 
-        public EmployeesController(IEmployeeService employeeService)
+        public DepartmentsController(IDepartmentService departmentService)
         {
-            _employeeService = employeeService;
+            _departmentService = departmentService;
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<EmployeeDetails>>> GetAllEmployees()
+        public async Task<ApiResponse<List<Department>>> GetAllDepartments()
         {
-            ApiResponse<List<EmployeeDetails>> apiResponse = new();
+            ApiResponse<List<Department>> apiResponse = new();
 
             try
             {
-                var data = await _employeeService.GetAllEmployees();
+                var data = await _departmentService.GetAllDepartments();
                 apiResponse.Success = true;
                 apiResponse.Result = data?.ToList();
             }
@@ -38,13 +38,13 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse<EmployeeDetails>> GetEmployeeById(int id)
+        public async Task<ApiResponse<Department>> GetDepartmentById(int id)
         {
-            ApiResponse<EmployeeDetails> apiResponse = new();
+            ApiResponse<Department> apiResponse = new();
 
             try
             {
-                var data = await _employeeService.GetEmployeeById(id);
+                var data = await _departmentService.GetDepartmentById(id);
                 apiResponse.Success = true;
                 apiResponse.Result = data;
             }
@@ -58,13 +58,13 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ApiResponse<int>> AddEmployee([FromBody] AddEmployeeDto dto)
+        public async Task<ApiResponse<int>> AddDepartment([FromBody] AddUpdateDepartmentDto dto)
         {
             ApiResponse<int> apiResponse = new();
 
             try
             {
-                await _employeeService.AddEmployee(dto);
+                await _departmentService.AddDepartment(dto);
                 apiResponse.Success = true;
                 apiResponse.Result = 1;
             }
@@ -78,13 +78,13 @@ namespace EMS.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse<int>> UpdateEmployee(int id, [FromBody] UpdateEmployeeDto dto)
+        public async Task<ApiResponse<int>> UpdateDepartment(int id, [FromBody] AddUpdateDepartmentDto dto)
         {
             ApiResponse<int> apiResponse = new();
 
             try
             {
-                await _employeeService.UpdateEmployee(id, dto);
+                await _departmentService.UpdateDepartment(id, dto);
                 apiResponse.Success = true;
                 apiResponse.Result = 1;
             }
@@ -98,13 +98,13 @@ namespace EMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<int>> DeleteEmployee(int id)
+        public async Task<ApiResponse<int>> DeleteDepartment(int id)
         {
             ApiResponse<int> apiResponse = new();
 
             try
             {
-                await _employeeService.DeleteEmployee(id);
+                await _departmentService.DeleteDepartment(id);
                 apiResponse.Success = true;
                 apiResponse.Result = 1;
             }

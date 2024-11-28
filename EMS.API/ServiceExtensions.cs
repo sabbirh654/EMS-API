@@ -19,6 +19,8 @@ public static class ServiceExtensions
         services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
 
         services.AddScoped<IEmployeeService, EmployeeService>();
+        services.AddScoped<IDesignationService, DesignationService>();
+        services.AddScoped<IDepartmentService, DepartmentService>();
 
         return services;
     }
