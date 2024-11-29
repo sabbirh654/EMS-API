@@ -2,6 +2,7 @@
 
 namespace EMS.Repository.Interfaces;
 
-public interface IAttendanceRepository : IGenericGetRepository<Attendance>
+public interface IAttendanceRepository : IGenericGetRepository<Attendance>, IGenericPostRepository<Attendance>
 {
+    Task<IEnumerable<Attendance>?> GetAllAsync(AttendanceFilter filter);
 }

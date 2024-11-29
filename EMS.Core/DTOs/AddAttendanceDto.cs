@@ -1,8 +1,7 @@
-﻿namespace EMS.Core.Entities;
+﻿namespace EMS.Core.DTOs;
 
-public class Attendance
+public class AddAttendanceDto
 {
-    public int Id { get; set; }
     public int EmployeeId { get; set; }
     public DateTime Date { get; set; }
     public TimeSpan CheckInTime { get; set; }
