@@ -25,4 +25,13 @@ public static class ServiceExtensions
 
         return services;
     }
+
+    public static IServiceCollection RegisterFrameworkServices(this IServiceCollection services)
+    {
+        services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(c => c.SupportNonNullableReferenceTypes());
+
+        return services;
+    }
 }
