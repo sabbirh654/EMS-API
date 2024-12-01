@@ -1,6 +1,7 @@
 ﻿using EMS.API.Models;
 using EMS.Core.DTOs;
 using EMS.Core.Entities;
+using EMS.Core.Exceptions;
 using EMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,12 @@ namespace EMS.API.Controllers
                 apiResponse.Success = true;
                 apiResponse.Result = 1;
             }
+            catch(ServiceException ex)
+            {
+                apiResponse.Success = false;
+                apiResponse.ErrorCode = ex.ErrorCode;
+                apiResponse.Message = ex.Message;
+            }
             catch (Exception ex)
             {
                 apiResponse.Success = false;
@@ -67,6 +74,12 @@ namespace EMS.API.Controllers
                 await _attendanceService.UpdateAttendance(id, dto);
                 apiResponse.Success = true;
                 apiResponse.Result = 1;
+            }
+            catch (ServiceException ex)
+            {
+                apiResponse.Success = false;
+                apiResponse.ErrorCode = ex.ErrorCode;
+                apiResponse.Message = ex.Message;
             }
             catch (Exception ex)
             {

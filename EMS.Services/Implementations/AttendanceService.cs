@@ -1,6 +1,7 @@
 ﻿using DnsClient.Internal;
 using EMS.Core.DTOs;
 using EMS.Core.Entities;
+using EMS.Core.Exceptions;
 using EMS.Core.Mappers;
 using EMS.Repository.Implementations;
 using EMS.Repository.Interfaces;
@@ -32,6 +33,11 @@ public class AttendanceService : IAttendanceService
         {
             await _attendanceRepository.AddAsync(attendance);
             await _operationLogRepository.AddLogAsync(log);
+        }
+        catch (RepositoryException ex)
+        {
+            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(AddAttendance)} function");
+            throw new ServiceException(ex.Message, ex.ErrorCode);
         }
         catch (Exception ex)
         {
@@ -86,6 +92,12 @@ public class AttendanceService : IAttendanceService
         {
             await _attendanceRepository.UpdateAsync(attendance);
             await _operationLogRepository.AddLogAsync(log);
+        }
+        catch (RepositoryException ex)
+        {
+            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(AddAttendance)} function");
+            throw new ServiceException(ex.Message, ex.ErrorCode);
+            throw;
         }
         catch (Exception ex)
         {

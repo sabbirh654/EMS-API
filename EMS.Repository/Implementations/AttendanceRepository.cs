@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DnsClient.Internal;
 using EMS.Core.Entities;
+using EMS.Core.Exceptions;
 using EMS.Repository.DatabaseProviders;
 using EMS.Repository.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -35,10 +36,13 @@ public class AttendanceRepository : IAttendanceRepository
             {
                 await connection.ExecuteAsync("insert_attendance", parameters, commandType: CommandType.StoredProcedure);
             }
-            catch (NpgsqlException ex)
+            catch (PostgresException ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(AddAsync)} function");
-                throw;
+                if (ex.SqlState == "P0001")
+                {
+                    _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(AddAsync)} function");
+                    throw new RepositoryException(message: ex.Message, errorCode: ex.SqlState);
+                }
             }
         }
     }
@@ -55,7 +59,7 @@ public class AttendanceRepository : IAttendanceRepository
             {
                 await connection.ExecuteAsync("delete_attendance", parameters, commandType: CommandType.StoredProcedure);
             }
-            catch (NpgsqlException ex)
+            catch (PostgresException ex)
             {
                 _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(DeleteAsync)} function");
                 throw;
@@ -75,14 +79,14 @@ public class AttendanceRepository : IAttendanceRepository
             DynamicParameters parameters = new();
 
             parameters.Add("p_employee_id", filter.EmployeeId, DbType.Int32);
-            parameters.Add("p_date", filter.AttendanceDate, DbType.Date);
+            parameters.Add("p_date", filter.Date, DbType.Date);
 
             try
             {
                 var result = await connection.QueryAsync<Attendance>("SELECT * FROM get_attendance(@p_employee_id, @p_date)", parameters);
                 return result.ToList();
             }
-            catch (NpgsqlException ex)
+            catch (PostgresException ex)
             {
                 _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(GetAllAsync)} function");
                 throw;
@@ -109,10 +113,13 @@ public class AttendanceRepository : IAttendanceRepository
             {
                 await connection.ExecuteAsync("update_attendance", parameters, commandType: CommandType.StoredProcedure);
             }
-            catch (NpgsqlException ex)
+            catch (PostgresException ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(UpdateAsync)} function");
-                throw;
+                if (ex.SqlState == "P0001")
+                {
+                    _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(AddAsync)} function");
+                    throw new RepositoryException(message: ex.Message, errorCode: ex.SqlState);
+                }
             }
         }
     }
