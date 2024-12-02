@@ -38,6 +38,26 @@ namespace EMS.API.Controllers
             return apiResponse;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ApiResponse<List<AttendanceDetails>>> Get(int id)
+        {
+            ApiResponse<List<AttendanceDetails>> apiResponse = new();
+
+            try
+            {
+                var data = await _attendanceService.GetEmployeeAttendance(id);
+                apiResponse.Success = true;
+                apiResponse.Result = data?.ToList();
+            }
+            catch (Exception ex)
+            {
+                apiResponse.Success = false;
+                apiResponse.Message = ex.Message;
+            }
+
+            return apiResponse;
+        }
+
         [HttpPost]
         public async Task<ApiResponse<int>> AddAttendance([FromBody] AddAttendanceDto dto)
         {

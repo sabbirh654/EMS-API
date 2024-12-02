@@ -94,6 +94,27 @@ public class AttendanceRepository : IAttendanceRepository
         }
     }
 
+    public async Task<IEnumerable<AttendanceDetails>?> GetAllByIdAsync(int id)
+    {
+        using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
+        {
+            DynamicParameters parameters = new();
+
+            parameters.Add("p_employee_id", id, DbType.Int32);
+
+            try
+            {
+                var result = await connection.QueryAsync<AttendanceDetails>("SELECT * FROM get_attendance_history(@p_employee_id)", parameters);
+                return result.ToList();
+            }
+            catch (PostgresException ex)
+            {
+                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(GetAllAsync)} function");
+                throw;
+            }
+        }
+    }
+
     public Task<Attendance?> GetByIdAsync(int id)
     {
         throw new NotImplementedException();

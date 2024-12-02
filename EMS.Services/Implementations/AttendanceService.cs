@@ -81,6 +81,20 @@ public class AttendanceService : IAttendanceService
         throw new NotImplementedException();
     }
 
+    public async Task<IEnumerable<AttendanceDetails>?> GetEmployeeAttendance(int employeeId)
+    {
+        try
+        {
+            var result = await _attendanceRepository.GetAllByIdAsync(employeeId);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(GetAllAttendance)} function");
+            throw;
+        }
+    }
+
     public async Task UpdateAttendance(int id, UpdateAttendanceDto dto)
     {
         Attendance attendance = dto.MapAttendanceUpdateDto();
