@@ -1,5 +1,4 @@
-﻿using EMS.Core.Extensions;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace EMS.Core.Entities;

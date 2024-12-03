@@ -28,22 +28,36 @@ public class OperationLogRepository : IOperationLogRepository
         {
             await _operationLogs.InsertOneAsync(log);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, $"Error while adding a record in the log with {ex.Message}");
         }
     }
 
-    public async Task<IEnumerable<OperationLog>?> GetAllLogsAsync()
+    //public async Task<IEnumerable<OperationLog>?> GetAllLogsAsync()
+    //{
+    //    try
+    //    {
+    //        return await _operationLogs.Find(log => true).ToListAsync();
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, $"Error while getting records from logs : {ex.Message}");
+    //        throw;
+    //    }
+    //}
+
+    public async Task<IEnumerable<OperationLog>?> GetFilteredLogs(LogFilter f)
     {
-        try
-        {
-            return await _operationLogs.Find(log => true).ToListAsync();
-        }
-        catch(Exception ex)
-        {
-            _logger.LogError(ex, $"Error while getting records from logs : {ex.Message}");
-            throw;
-        }
+        var filter = Builders<OperationLog>.Filter.And(
+            Builders<OperationLog>.Filter.Eq(log => log.EntityId, f.id.ToString()),
+            Builders<OperationLog>.Filter.Eq(log => log.EntityName, f.EnitityName)
+        );
+
+        var sort = Builders<OperationLog>.Sort.Descending(log => log.Date)
+                                          .Descending(log => log.Time);
+
+        var result =  await _operationLogs.Find(filter).Sort(sort).ToListAsync();
+        return result;
     }
 }
