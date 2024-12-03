@@ -2,6 +2,6 @@
 
 public class LogFilter
 {
-    public int id { get; set; }
-    public string EnitityName { get; set; } = null!;
+    public int Id { get; set; }
+    public string EntityName { get; set; } = null!;
 }
