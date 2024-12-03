@@ -1,10 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using EMS.Repository.DatabaseProviders.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Npgsql;
 using System.Data;
 
-namespace EMS.Repository.DatabaseProviders;
+namespace EMS.Repository.DatabaseProviders.Implementations;
 
 public class DatabaseFactory : IDatabaseFactory
 {
@@ -17,13 +18,13 @@ public class DatabaseFactory : IDatabaseFactory
 
     public IDbConnection CreateSqlServerConnection()
     {
-        var connection =  new SqlConnection(_configuration.GetConnectionString("SqlServerConnection"));
+        var connection = new SqlConnection(_configuration.GetConnectionString("SqlServerConnection"));
         try
         {
             connection.Open();
             return connection;
         }
-        catch(SqlException ex)
+        catch (SqlException ex)
         {
             connection.Dispose();
             throw new InvalidOperationException("Failed to establish SqlServer connection", ex);
@@ -52,7 +53,7 @@ public class DatabaseFactory : IDatabaseFactory
             var client = new MongoClient(_configuration.GetConnectionString("MongoDbConnection"));
             return client.GetDatabase(_configuration["ConnectionStrings:MongoDbDatabaseName"]);
         }
-        catch(MongoException ex)
+        catch (MongoException ex)
         {
             throw new InvalidOperationException("Failed to obtain MongoDB database", ex);
         }

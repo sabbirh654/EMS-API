@@ -16,4 +16,10 @@ public static class Enums
         Designation,
         Attendance
     }
+
+    public enum DatabaseType
+    {
+        SqlServer,
+        PostgreSql
+    }
 }

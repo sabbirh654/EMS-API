@@ -1,6 +1,6 @@
 ﻿using DnsClient.Internal;
 using EMS.Core.Entities;
-using EMS.Repository.DatabaseProviders;
+using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -50,7 +50,7 @@ public class OperationLogRepository : IOperationLogRepository
     public async Task<IEnumerable<OperationLog>?> GetFilteredLogs(LogFilter f)
     {
         var filter = Builders<OperationLog>.Filter.And(
-            Builders<OperationLog>.Filter.Eq(log => log.EntityId, f.Id.ToString()),
+            Builders<OperationLog>.Filter.Eq(log => log.EntityId, f.id.ToString()),
             Builders<OperationLog>.Filter.Eq(log => log.EntityName, f.EntityName)
         );
 

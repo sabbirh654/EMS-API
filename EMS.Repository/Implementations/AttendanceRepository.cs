@@ -1,12 +1,10 @@
 ﻿using Dapper;
-using DnsClient.Internal;
 using EMS.Core.Entities;
-using EMS.Core.Exceptions;
-using EMS.Repository.DatabaseProviders;
+using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using System.Data;
+using static EMS.Core.Enums;
 
 namespace EMS.Repository.Implementations;
 
@@ -14,34 +12,49 @@ public class AttendanceRepository : IAttendanceRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
     private readonly ILogger<AttendanceRepository> _logger;
+    private readonly IOperationLogRepository _operationLogRepository;
+    private readonly IDatabaseExceptionHandlerFactory _databaseExceptionHandlerFactory;
+    private IDatabaseExceptionHandler? _exceptionHandler;
 
-    public AttendanceRepository(IDatabaseFactory databaseFactory, ILogger<AttendanceRepository> logger)
+    public AttendanceRepository(
+        IDatabaseFactory databaseFactory,
+        ILogger<AttendanceRepository> logger,
+        IOperationLogRepository operationLogRepository,
+        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory,
+        IDatabaseExceptionHandler databaseExceptionHandler)
     {
         _databaseFactory = databaseFactory;
         _logger = logger;
+        _operationLogRepository = operationLogRepository;
+        _databaseExceptionHandlerFactory = databaseExceptionHandlerFactory;
+
+        OnInit();
     }
+
+    private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.PostgreSql);
 
     public async Task AddAsync(Attendance attendance)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
-            DynamicParameters parameters = new();
-
-            parameters.Add("p_employee_id", attendance.EmployeeId, DbType.Int32);
-            parameters.Add("p_attendance_date", attendance.Date, DbType.Date);
-            parameters.Add("p_check_in_time", attendance.CheckInTime, DbType.Time);
-            parameters.Add("p_check_out_time", attendance.CheckOutTime, DbType.Time);
-
-            try
+            using (var transaction = connection.BeginTransaction())
             {
-                await connection.ExecuteAsync("insert_attendance", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (PostgresException ex)
-            {
-                if (ex.SqlState == "P0001")
+                DynamicParameters parameters = new();
+
+                parameters.Add("p_employee_id", attendance.EmployeeId, DbType.Int32);
+                parameters.Add("p_attendance_date", attendance.Date, DbType.Date);
+                parameters.Add("p_check_in_time", attendance.CheckInTime, DbType.Time);
+                parameters.Add("p_check_out_time", attendance.CheckOutTime, DbType.Time);
+
+                try
                 {
-                    _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(AddAsync)} function");
-                    throw new RepositoryException(message: ex.Message, errorCode: ex.SqlState);
+                    await connection.ExecuteAsync("insert_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    _exceptionHandler?.Handle(ex);
                 }
             }
         }
@@ -51,18 +64,22 @@ public class AttendanceRepository : IAttendanceRepository
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
-            DynamicParameters parameters = new();
-
-            parameters.Add("p_id", id, DbType.Int32);
-
-            try
+            using (var transaction = connection.BeginTransaction())
             {
-                await connection.ExecuteAsync("delete_attendance", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (PostgresException ex)
-            {
-                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(DeleteAsync)} function");
-                throw;
+                DynamicParameters parameters = new();
+
+                parameters.Add("p_id", id, DbType.Int32);
+
+                try
+                {
+                    await connection.ExecuteAsync("delete_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    _exceptionHandler?.Handle(ex);
+                }
             }
         }
     }
@@ -86,10 +103,10 @@ public class AttendanceRepository : IAttendanceRepository
                 var result = await connection.QueryAsync<Attendance>("SELECT * FROM get_attendance(@p_employee_id, @p_date)", parameters);
                 return result.ToList();
             }
-            catch (PostgresException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(GetAllAsync)} function");
-                throw;
+                _exceptionHandler?.Handle(ex);
+                return null;
             }
         }
     }
@@ -107,10 +124,10 @@ public class AttendanceRepository : IAttendanceRepository
                 var result = await connection.QueryAsync<AttendanceDetails>("SELECT * FROM get_attendance_history(@p_employee_id)", parameters);
                 return result.ToList();
             }
-            catch (PostgresException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(GetAllAsync)} function");
-                throw;
+                _exceptionHandler?.Handle(ex);
+                return null;
             }
         }
     }
@@ -124,22 +141,22 @@ public class AttendanceRepository : IAttendanceRepository
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
-            DynamicParameters parameters = new();
-
-            parameters.Add("p_id", attendance.Id, DbType.Int32);
-            parameters.Add("p_check_in_time", attendance.CheckInTime, DbType.Time);
-            parameters.Add("p_check_out_time", attendance.CheckOutTime, DbType.Time);
-
-            try
+            using (var transaction = connection.BeginTransaction())
             {
-                await connection.ExecuteAsync("update_attendance", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (PostgresException ex)
-            {
-                if (ex.SqlState == "P0001")
+                DynamicParameters parameters = new();
+
+                parameters.Add("p_id", attendance.Id, DbType.Int32);
+                parameters.Add("p_check_in_time", attendance.CheckInTime, DbType.Time);
+                parameters.Add("p_check_out_time", attendance.CheckOutTime, DbType.Time);
+
+                try
                 {
-                    _logger.LogError(ex, $"Database error in {nameof(AttendanceRepository)} at {nameof(AddAsync)} function");
-                    throw new RepositoryException(message: ex.Message, errorCode: ex.SqlState);
+                    await connection.ExecuteAsync("update_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler?.Handle(ex);
                 }
             }
         }

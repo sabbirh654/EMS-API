@@ -1,10 +1,10 @@
 ﻿using Dapper;
 using EMS.Core.Entities;
-using EMS.Repository.DatabaseProviders;
+using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using static EMS.Core.Enums;
 
 namespace EMS.Repository.Implementations;
 
@@ -12,29 +12,47 @@ public class DepartmentRepository : IDepartmentRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
     private readonly ILogger<DepartmentRepository> _logger;
+    private readonly IOperationLogRepository _operationLogRepository;
+    private readonly IDatabaseExceptionHandlerFactory _databaseExceptionHandlerFactory;
+    private IDatabaseExceptionHandler? _exceptionHandler;
 
-    public DepartmentRepository(IDatabaseFactory databaseFactory, ILogger<DepartmentRepository> logger)
+    public DepartmentRepository(
+        IDatabaseFactory databaseFactory,
+        ILogger<DepartmentRepository> logger,
+        IOperationLogRepository operationLogRepository,
+        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory,
+        IDatabaseExceptionHandler databaseExceptionHandler)
     {
         _databaseFactory = databaseFactory;
         _logger = logger;
+        _operationLogRepository = operationLogRepository;
+        _databaseExceptionHandlerFactory = databaseExceptionHandlerFactory;
+
+        OnInit();
     }
+
+    private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.SqlServer);
+
 
     public async Task AddAsync(Department department)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
-            DynamicParameters parameters = new();
-
-            parameters.Add("@Name", department.Name);
-
-            try
+            using (var transaction = connection.BeginTransaction())
             {
-                await connection.ExecuteAsync("AddNewDepartment", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError(ex, $"Database error in {nameof(DepartmentRepository)} at {AddAsync} function");
-                throw;
+                DynamicParameters parameters = new();
+
+                parameters.Add("@Name", department.Name);
+
+                try
+                {
+                    await connection.ExecuteAsync("AddNewDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler?.Handle(ex);
+                }
             }
         }
     }
@@ -43,17 +61,21 @@ public class DepartmentRepository : IDepartmentRepository
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
-            DynamicParameters parameters = new();
-            parameters.Add("@Id", id);
+            using (var transaction = connection.BeginTransaction())
+            {
+                DynamicParameters parameters = new();
 
-            try
-            {
-                await connection.ExecuteAsync("DeleteDepartment", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError(ex, $"Database error in {nameof(DepartmentRepository)} at {DeleteAsync} function");
-                throw;
+                parameters.Add("@Id", id);
+
+                try
+                {
+                    await connection.ExecuteAsync("DeleteDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler?.Handle(ex);
+                }
             }
         }
     }
@@ -67,10 +89,10 @@ public class DepartmentRepository : IDepartmentRepository
                 var result = await connection.QueryAsync<Department>("GetAllDepartments", commandType: CommandType.StoredProcedure);
                 return result.ToList();
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(DepartmentRepository)} at {GetAllAsync} function");
-                throw;
+                _exceptionHandler?.Handle(ex);
+                return null;
             }
         }
     }
@@ -80,6 +102,7 @@ public class DepartmentRepository : IDepartmentRepository
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
             DynamicParameters parameters = new();
+
             parameters.Add("@Id", id);
 
             try
@@ -87,10 +110,10 @@ public class DepartmentRepository : IDepartmentRepository
                 var result = await connection.QuerySingleOrDefaultAsync<Department>("GetDepartmentById", parameters, commandType: CommandType.StoredProcedure);
                 return result;
             }
-            catch (SqlException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, $"Database error in {nameof(DepartmentRepository)} at {GetByIdAsync} function");
-                throw;
+                _exceptionHandler?.Handle(ex);
+                return null;
             }
         }
     }
@@ -99,19 +122,22 @@ public class DepartmentRepository : IDepartmentRepository
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
-            DynamicParameters parameters = new();
-
-            parameters.Add("@Id", department.Id);
-            parameters.Add("@Name", department.Name);
-
-            try
+            using (var transaction = connection.BeginTransaction())
             {
-                await connection.ExecuteAsync("UpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError(ex, $"Database error in {nameof(DepartmentRepository)} at {nameof(UpdateAsync)} function");
-                throw;
+                DynamicParameters parameters = new();
+
+                parameters.Add("@Id", department.Id);
+                parameters.Add("@Name", department.Name);
+
+                try
+                {
+                    await connection.ExecuteAsync("UpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    _exceptionHandler?.Handle(ex);
+                }
             }
         }
     }

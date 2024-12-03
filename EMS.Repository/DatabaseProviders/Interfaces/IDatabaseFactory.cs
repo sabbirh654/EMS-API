@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
 using System.Data;
 
-namespace EMS.Repository.DatabaseProviders;
+namespace EMS.Repository.DatabaseProviders.Interfaces;
 
 public interface IDatabaseFactory
 {

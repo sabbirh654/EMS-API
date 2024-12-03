@@ -1,4 +1,5 @@
-﻿using EMS.Repository.DatabaseProviders;
+﻿using EMS.Repository.DatabaseProviders.Implementations;
+using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Implementations;
 using EMS.Repository.Interfaces;
 using EMS.Services.Implementations;
@@ -22,6 +23,10 @@ public static class ServiceExtensions
         services.AddScoped<IDesignationService, DesignationService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IAttendanceService, AttendanceService>();
+
+        services.AddScoped<SqlServerExceptionHandler>();
+        services.AddScoped<PostgreSqlExceptionHandler>();
+        services.AddScoped<IDatabaseExceptionHandlerFactory, DatabaseExceptionHandlerFactory>();
 
         return services;
     }
