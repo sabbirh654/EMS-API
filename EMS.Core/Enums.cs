@@ -4,9 +4,9 @@ public static class Enums
 {
     public enum OperationType
     {
-        ADD,
-        UPDATE,
-        DELETE
+        Add,
+        Update,
+        Delete
     }
 
     public enum EntityName
@@ -20,6 +20,7 @@ public static class Enums
     public enum DatabaseType
     {
         SqlServer,
-        PostgreSql
+        PostgreSql,
+        MongoDb
     }
 }

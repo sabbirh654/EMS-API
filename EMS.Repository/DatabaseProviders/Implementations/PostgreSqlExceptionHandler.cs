@@ -38,7 +38,7 @@ public class PostgreSqlExceptionHandler : IDatabaseExceptionHandler
         }
         else
         {
-            _logger.LogError(ex, "Unexpected error occurs.");
+            _logger.LogError(ex, "Unexpected error occurs in postgresql db.");
         }
     }
 }

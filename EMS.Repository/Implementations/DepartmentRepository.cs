@@ -2,7 +2,6 @@
 using EMS.Core.Entities;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using static EMS.Core.Enums;
 
@@ -11,20 +10,16 @@ namespace EMS.Repository.Implementations;
 public class DepartmentRepository : IDepartmentRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
-    private readonly ILogger<DepartmentRepository> _logger;
     private readonly IOperationLogRepository _operationLogRepository;
     private readonly IDatabaseExceptionHandlerFactory _databaseExceptionHandlerFactory;
     private IDatabaseExceptionHandler? _exceptionHandler;
 
     public DepartmentRepository(
         IDatabaseFactory databaseFactory,
-        ILogger<DepartmentRepository> logger,
         IOperationLogRepository operationLogRepository,
-        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory,
-        IDatabaseExceptionHandler databaseExceptionHandler)
+        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory)
     {
         _databaseFactory = databaseFactory;
-        _logger = logger;
         _operationLogRepository = operationLogRepository;
         _databaseExceptionHandlerFactory = databaseExceptionHandlerFactory;
 
@@ -47,6 +42,10 @@ public class DepartmentRepository : IDepartmentRepository
                 try
                 {
                     await connection.ExecuteAsync("AddNewDepartment", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Add.ToString(), EntityName.Department.ToString(), "", $"New department has been added.");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (Exception ex)
@@ -70,6 +69,10 @@ public class DepartmentRepository : IDepartmentRepository
                 try
                 {
                     await connection.ExecuteAsync("DeleteDepartment", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Delete.ToString(), EntityName.Department.ToString(), $"{id}", $"Department has been deleted with Id = {id}");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (Exception ex)
@@ -132,6 +135,10 @@ public class DepartmentRepository : IDepartmentRepository
                 try
                 {
                     await connection.ExecuteAsync("UpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Update.ToString(), EntityName.Department.ToString(), $"{department.Id}", $"Department has been updated with Id = {department.Id}");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (Exception ex)

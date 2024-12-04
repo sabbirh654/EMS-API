@@ -11,25 +11,20 @@ public class DepartmentService : IDepartmentService
 {
     private readonly IDepartmentRepository _departmentRepository;
     private readonly ILogger<DepartmentService> _logger;
-    private readonly IOperationLogRepository _operationLogRepository;
 
-    public DepartmentService(IDepartmentRepository departmentRepository, ILogger<DepartmentService> logger, IOperationLogRepository operationLogRepository)
+    public DepartmentService(IDepartmentRepository departmentRepository, ILogger<DepartmentService> logger)
     {
         _departmentRepository = departmentRepository;
         _logger = logger;
-        _operationLogRepository = operationLogRepository;
     }
 
     public async Task AddDepartment(AddUpdateDepartmentDto dto)
     {
         Department department = dto.MapDepartmentAddUpdateDto();
 
-        OperationLog log = new OperationLog("ADD", "Department", "", "New department has been added");
-
         try
         {
             await _departmentRepository.AddAsync(department);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -40,12 +35,9 @@ public class DepartmentService : IDepartmentService
 
     public async Task DeleteDepartment(int id)
     {
-        OperationLog log = new OperationLog("DELETE", "Department", $"{id}", $"A department has been deleted with Id = {id}");
-
         try
         {
             await _departmentRepository.DeleteAsync(id);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -87,12 +79,9 @@ public class DepartmentService : IDepartmentService
         Department department = dto.MapDepartmentAddUpdateDto();
         department.Id = id;
 
-        OperationLog log = new("UPDATE", "Department", $"{id}", $"A department has been updated with Id = {id}");
-
         try
         {
             await _departmentRepository.UpdateAsync(department);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {

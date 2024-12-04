@@ -1,28 +1,28 @@
 ﻿using DnsClient.Internal;
 using EMS.Repository.DatabaseProviders.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 
 namespace EMS.Repository.DatabaseProviders.Implementations;
 
-public class SqlServerExceptionHandler : IDatabaseExceptionHandler
+public class MongoDbExceptionHandler : IDatabaseExceptionHandler
 {
-    private readonly ILogger<SqlServerExceptionHandler> _logger;
+    private readonly ILogger<MongoDbExceptionHandler> _logger;
 
-    public SqlServerExceptionHandler(ILogger<SqlServerExceptionHandler> logger)
+    public MongoDbExceptionHandler(ILogger<MongoDbExceptionHandler> logger)
     {
         _logger = logger;
     }
 
     public void Handle(Exception ex)
     {
-        if (ex is SqlException sqlEx)
+        if (ex is MongoException mongoEx)
         {
             _logger.LogError(ex.Message);
 
             #region specific error handling
 
-            //switch (sqlEx.Number)
+            //switch (mongoEx.)
             //{
             //    case 201: //param error
             //        break;
@@ -41,7 +41,7 @@ public class SqlServerExceptionHandler : IDatabaseExceptionHandler
         }
         else
         {
-            _logger.LogError(ex, "Unexpected erro occurs in sql server db.");
+            _logger.LogError(ex, "Unexpected erro occurs in mongo db.");
         }
     }
 }

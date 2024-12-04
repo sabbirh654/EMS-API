@@ -12,20 +12,16 @@ namespace EMS.Repository.Implementations;
 public class DesignationRepository : IDesignationRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
-    private readonly ILogger<DesignationRepository> _logger;
     private readonly IOperationLogRepository _operationLogRepository;
     private readonly IDatabaseExceptionHandlerFactory _databaseExceptionHandlerFactory;
     private IDatabaseExceptionHandler? _exceptionHandler;
 
     public DesignationRepository(
         IDatabaseFactory databaseFactory, 
-        ILogger<DesignationRepository>logger,
         IOperationLogRepository operationLogRepository,
-        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory,
-        IDatabaseExceptionHandler databaseExceptionHandler)
+        IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory)
     {
         _databaseFactory = databaseFactory;
-        _logger = logger;
         _operationLogRepository = operationLogRepository;
         _databaseExceptionHandlerFactory = databaseExceptionHandlerFactory;
 
@@ -47,6 +43,10 @@ public class DesignationRepository : IDesignationRepository
                 try
                 {
                     await connection.ExecuteAsync("AddNewDesignation", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Add.ToString(), EntityName.Designation.ToString(), "", $"New designation has been added.");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (Exception ex)
@@ -72,6 +72,10 @@ public class DesignationRepository : IDesignationRepository
                 try
                 {
                     await connection.ExecuteAsync("DeleteDesignation", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Delete.ToString(), EntityName.Designation.ToString(), $"{id}", $"Designation has been deleted with Id = {id}");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (SqlException ex)
@@ -135,6 +139,10 @@ public class DesignationRepository : IDesignationRepository
                 try
                 {
                     await connection.ExecuteAsync("UpdateDesignation", parameters, commandType: CommandType.StoredProcedure);
+
+                    OperationLog log = new(OperationType.Update.ToString(), EntityName.Designation.ToString(), $"{designation.Id}", $"Designation has been updated with Id = {designation.Id}");
+                    await _operationLogRepository.AddLogAsync(log);
+
                     transaction.Commit();
                 }
                 catch (SqlException ex)

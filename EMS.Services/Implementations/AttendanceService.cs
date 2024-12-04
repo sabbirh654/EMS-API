@@ -13,13 +13,11 @@ namespace EMS.Services.Implementations;
 public class AttendanceService : IAttendanceService
 {
     private readonly IAttendanceRepository _attendanceRepository;
-    private readonly IOperationLogRepository _operationLogRepository;
     private readonly ILogger<AttendanceService> _logger;
 
-    public AttendanceService(IAttendanceRepository attendanceRepository, IOperationLogRepository operationLogRepository, ILogger<AttendanceService> logger)
+    public AttendanceService(IAttendanceRepository attendanceRepository, ILogger<AttendanceService> logger)
     {
         _attendanceRepository = attendanceRepository;
-        _operationLogRepository = operationLogRepository;
         _logger = logger;
     }
 
@@ -27,12 +25,9 @@ public class AttendanceService : IAttendanceService
     {
         Attendance attendance = dto.MapAttendanceAddDto();
 
-        OperationLog log = new OperationLog("ADD", "Attendance", "", "Attendance has been added");
-
         try
         {
             await _attendanceRepository.AddAsync(attendance);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (RepositoryException ex)
         {
@@ -48,12 +43,9 @@ public class AttendanceService : IAttendanceService
 
     public async Task DeleteAttendance(int id)
     {
-        OperationLog log = new OperationLog("DELETE", "Attendance", $"{id}", $"Attendance has been deleted with Id = {id}");
-
         try
         {
             await _attendanceRepository.DeleteAsync(id);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -100,12 +92,9 @@ public class AttendanceService : IAttendanceService
         Attendance attendance = dto.MapAttendanceUpdateDto();
         attendance.Id = id;
 
-        OperationLog log = new("UPDATE", "Attendance", $"{id}", $"Attendance has been updated with Id = {id}");
-
         try
         {
             await _attendanceRepository.UpdateAsync(attendance);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (RepositoryException ex)
         {

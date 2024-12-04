@@ -19,6 +19,7 @@ public class DatabaseExceptionHandlerFactory : IDatabaseExceptionHandlerFactory
         {
             DatabaseType.SqlServer => _serviceProvider.GetRequiredService<SqlServerExceptionHandler>(),
             DatabaseType.PostgreSql => _serviceProvider.GetRequiredService<PostgreSqlExceptionHandler>(),
+            DatabaseType.MongoDb => _serviceProvider.GetRequiredService<MongoDbExceptionHandler>(),
             _ => throw new NotImplementedException($"Database type {type.ToString()} is not supported.")
         };
     }

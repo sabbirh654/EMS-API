@@ -11,24 +11,19 @@ public class DesignationService : IDesignationService
 {
     private readonly IDesignationRepository _designationRepository;
     private readonly ILogger<DesignationService> _logger;
-    private readonly IOperationLogRepository _operationLogRepository;
 
-    public DesignationService(IDesignationRepository designationRepository, ILogger<DesignationService> logger, IOperationLogRepository operationLogRepository)
+    public DesignationService(IDesignationRepository designationRepository, ILogger<DesignationService> logger)
     {
         _designationRepository = designationRepository;
         _logger = logger;
-        _operationLogRepository = operationLogRepository;
     }
     public async Task AddDesignation(AddUpdateDesignationDto dto)
     {
         Designation desingation = dto.MapDesignationAddUpdateDto();
 
-        OperationLog log = new OperationLog("ADD", "Designation", "", "New designation has been added");
-
         try
         {
             await _designationRepository.AddAsync(desingation);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -39,12 +34,9 @@ public class DesignationService : IDesignationService
 
     public async Task DeleteDesignation(int id)
     {
-        OperationLog log = new OperationLog("DELETE", "Designation", $"{id}", $"A desingation has been deleted with Id = {id}");
-
         try
         {
             await _designationRepository.DeleteAsync(id);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -86,12 +78,9 @@ public class DesignationService : IDesignationService
         Designation designation = dto.MapDesignationAddUpdateDto();
         designation.Id = id;
 
-        OperationLog log = new("UPDATE", "Desingation", $"{id}", $"A designation has been updated with Id = {id}");
-
         try
         {
             await _designationRepository.UpdateAsync(designation);
-            await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {

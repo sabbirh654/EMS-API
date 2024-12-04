@@ -11,19 +11,16 @@ namespace EMS.Repository.Implementations;
 public class EmployeeRepository : IEmployeeRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
-    private readonly ILogger<EmployeeRepository> _logger;
     private readonly IOperationLogRepository _operationLogRepository;
     private readonly IDatabaseExceptionHandlerFactory _databaseExceptionHandlerFactory;
     private IDatabaseExceptionHandler? _exceptionHandler;
 
     public EmployeeRepository(
         IDatabaseFactory databaseFactory,
-        ILogger<EmployeeRepository> logger,
         IOperationLogRepository operationLogRepository,
         IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory)
     {
         _databaseFactory = databaseFactory;
-        _logger = logger;
         _operationLogRepository = operationLogRepository;
         _databaseExceptionHandlerFactory = databaseExceptionHandlerFactory;
 
@@ -54,7 +51,7 @@ public class EmployeeRepository : IEmployeeRepository
                     int newId = await connection.ExecuteAsync("AddNewEmployee", parameters, commandType: CommandType.StoredProcedure);
                     int employeeId = parameters.Get<int>("@Id");
 
-                    OperationLog log = new(OperationType.ADD.ToString(), EntityName.Employee.ToString(), $"{employeeId}", $"Employee has been added with Id = {employeeId}");
+                    OperationLog log = new(OperationType.Add.ToString(), EntityName.Employee.ToString(), $"{employeeId}", $"Employee has been added with Id = {employeeId}");
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
@@ -82,7 +79,7 @@ public class EmployeeRepository : IEmployeeRepository
                 {
                     await connection.ExecuteAsync("DeleteEmployee", parameters, commandType: CommandType.StoredProcedure);
 
-                    OperationLog log = new(OperationType.DELETE.ToString(), EntityName.Employee.ToString(), $"{id}", $"Employee has been added with Id = {id}");
+                    OperationLog log = new(OperationType.Delete.ToString(), EntityName.Employee.ToString(), $"{id}", $"Employee has been added with Id = {id}");
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
@@ -153,7 +150,7 @@ public class EmployeeRepository : IEmployeeRepository
                 {
                     await connection.ExecuteAsync("UpdateEmployee", parameters, commandType: CommandType.StoredProcedure);
 
-                    OperationLog log = new(OperationType.UPDATE.ToString(), EntityName.Employee.ToString(), $"{employee.Id}", $"Employee has been added with Id = {employee.Id}");
+                    OperationLog log = new(OperationType.Update.ToString(), EntityName.Employee.ToString(), $"{employee.Id}", $"Employee has been added with Id = {employee.Id}");
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();

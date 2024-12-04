@@ -1,25 +1,34 @@
-﻿using DnsClient.Internal;
-using EMS.Core.Entities;
+﻿using EMS.Core.Entities;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using static EMS.Core.Enums;
 
 namespace EMS.Repository.Implementations;
 
 public class OperationLogRepository : IOperationLogRepository
 {
     private readonly IDatabaseFactory _databaseFactory;
-    private readonly IMongoDatabase _mongoDatabase;
-    private readonly IMongoCollection<OperationLog> _operationLogs;
-    private readonly ILogger<OperationLogRepository> _logger;
+    private readonly IDatabaseExceptionHandlerFactory _handlerFactory;
 
-    public OperationLogRepository(IDatabaseFactory databaseFactory, ILogger<OperationLogRepository> logger)
+    private IDatabaseExceptionHandler? _exceptionHandler;
+    private IMongoDatabase? _mongoDatabase;
+    private IMongoCollection<OperationLog>? _operationLogs;
+
+    public OperationLogRepository(IDatabaseFactory databaseFactory, IDatabaseExceptionHandlerFactory handlerFactory)
     {
         _databaseFactory = databaseFactory;
-        _logger = logger;
+        _handlerFactory = handlerFactory;
+
+        OnInit();
+    }
+
+    private void OnInit()
+    {
         _mongoDatabase = _databaseFactory.CreateMongoDbConnection();
         _operationLogs = _mongoDatabase.GetCollection<OperationLog>("OperationLogs");
+
+        _exceptionHandler = _handlerFactory.GetHandler(DatabaseType.MongoDb);
     }
 
     public async Task AddLogAsync(OperationLog log)
@@ -30,7 +39,7 @@ public class OperationLogRepository : IOperationLogRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error while adding a record in the log with {ex.Message}");
+            _exceptionHandler?.Handle(ex);
         }
     }
 
@@ -57,7 +66,14 @@ public class OperationLogRepository : IOperationLogRepository
         var sort = Builders<OperationLog>.Sort.Descending(log => log.Date)
                                           .Descending(log => log.Time);
 
-        var result =  await _operationLogs.Find(filter).Sort(sort).ToListAsync();
-        return result;
+        try
+        {
+            return await _operationLogs.Find(filter).Sort(sort).ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            _exceptionHandler?.Handle(ex);
+            return null;
+        }
     }
 }

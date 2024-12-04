@@ -11,24 +11,20 @@ public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _employeeRepository;
     private readonly ILogger<EmployeeService> _logger;
-    private readonly IOperationLogRepository _operationLogRepository;
 
-    public EmployeeService(IEmployeeRepository employeeRepository, ILogger<EmployeeService>logger, IOperationLogRepository operationLogRepository)
+    public EmployeeService(IEmployeeRepository employeeRepository, ILogger<EmployeeService>logger)
     {
         _employeeRepository = employeeRepository;
         _logger = logger;
-        _operationLogRepository = operationLogRepository;
     }
 
     public async Task AddEmployee(AddEmployeeDto dto)
     {
         Employee employee = dto.MapEmployeeAddDto();
-        //OperationLog log = new OperationLog("ADD", "Employee", "", "New employee has been added");
 
         try
         {
             await _employeeRepository.AddAsync(employee);
-            //await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -39,12 +35,9 @@ public class EmployeeService : IEmployeeService
 
     public async Task DeleteEmployee(int id)
     {
-        //OperationLog log = new OperationLog("DELETE", "Employee", $"{id}", $"An employee has been deleted with Id = {id}");
-
         try
         {
             await _employeeRepository.DeleteAsync(id);
-            //await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
@@ -86,12 +79,9 @@ public class EmployeeService : IEmployeeService
         Employee employee = dto.MapEmployeeUpdateDto();
         employee.Id = id;
 
-        //OperationLog log = new ("UPDATE", "Employee", $"{id}", $"An employee has been updated with Id = {id}");
-
         try
         {
             await _employeeRepository.UpdateAsync(employee);
-            //await _operationLogRepository.AddLogAsync(log);
         }
         catch (Exception ex)
         {
