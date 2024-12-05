@@ -49,7 +49,7 @@ public class EmployeeRepository : IEmployeeRepository
 
                 try
                 {
-                    int newId = await connection.ExecuteAsync("AddNewEmployee", parameters, commandType: CommandType.StoredProcedure);
+                    int newId = await connection.ExecuteAsync("AddNewEmployee", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
                     int employeeId = parameters.Get<int>("@Id");
 
                     OperationLog log = new(OperationType.Add.ToString(), EntityName.Employee.ToString(), $"{employeeId}", $"Employee has been added with Id = {employeeId}");

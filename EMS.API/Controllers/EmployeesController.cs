@@ -44,6 +44,11 @@ namespace EMS.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _employeeService.GetEmployeeById(id);
@@ -66,6 +71,10 @@ namespace EMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto dto)
         {
+            if(!ModelState.IsValid)
+            {
+
+            }
             try
             {
                 var result = await _employeeService.AddEmployee(dto);

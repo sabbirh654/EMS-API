@@ -1,6 +1,4 @@
-﻿using EMS.Core.Helpers;
-
-namespace EMS.Core.Models;
+﻿namespace EMS.Core.Models;
 
 public static class ApiResultFactory
 {
