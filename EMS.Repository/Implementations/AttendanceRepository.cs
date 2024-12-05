@@ -1,8 +1,9 @@
 ﻿using Dapper;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using static EMS.Core.Enums;
 
@@ -29,7 +30,7 @@ public class AttendanceRepository : IAttendanceRepository
 
     private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.PostgreSql);
 
-    public async Task AddAsync(Attendance attendance)
+    public async Task<ApiResult> AddAsync(Attendance attendance)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
@@ -50,17 +51,21 @@ public class AttendanceRepository : IAttendanceRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_ATTENDANCE_ERROR);
                 }
             }
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<ApiResult> DeleteAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
@@ -78,22 +83,26 @@ public class AttendanceRepository : IAttendanceRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_ATTENDANCE_ERROR);
                 }
             }
         }
     }
 
-    public Task<IEnumerable<Attendance>?> GetAllAsync()
+    public Task<ApiResult> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Attendance>?> GetAllAsync(AttendanceFilter filter)
+    public async Task<ApiResult> GetAllAsync(AttendanceFilter filter)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
@@ -105,17 +114,19 @@ public class AttendanceRepository : IAttendanceRepository
             try
             {
                 var result = await connection.QueryAsync<Attendance>("SELECT * FROM get_attendance(@p_employee_id, @p_date)", parameters);
-                return result.ToList();
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR);
             }
         }
     }
 
-    public async Task<IEnumerable<AttendanceDetails>?> GetAllByIdAsync(int id)
+    public async Task<ApiResult> GetAllByIdAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
@@ -126,22 +137,24 @@ public class AttendanceRepository : IAttendanceRepository
             try
             {
                 var result = await connection.QueryAsync<AttendanceDetails>("SELECT * FROM get_attendance_history(@p_employee_id)", parameters);
-                return result.ToList();
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR);
             }
         }
     }
 
-    public Task<Attendance?> GetByIdAsync(int id)
+    public Task<ApiResult> GetByIdAsync(int id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task UpdateAsync(Attendance attendance)
+    public async Task<ApiResult> UpdateAsync(Attendance attendance)
     {
         using (IDbConnection connection = _databaseFactory.CreatePostgresSqlConnection())
         {
@@ -161,10 +174,15 @@ public class AttendanceRepository : IAttendanceRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_ATTENDANCE_ERROR);
                 }
             }
         }

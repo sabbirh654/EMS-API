@@ -1,5 +1,7 @@
 ﻿using Dapper;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
 using System.Data;
@@ -29,7 +31,7 @@ public class DepartmentRepository : IDepartmentRepository
     private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.SqlServer);
 
 
-    public async Task AddAsync(Department department)
+    public async Task<ApiResult> AddAsync(Department department)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -47,16 +49,21 @@ public class DepartmentRepository : IDepartmentRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_DEPARTMENT_ERROR);
                 }
             }
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<ApiResult> DeleteAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -74,33 +81,40 @@ public class DepartmentRepository : IDepartmentRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_DEPARTMENT_ERROR);
                 }
             }
         }
     }
 
-    public async Task<IEnumerable<Department>?> GetAllAsync()
+    public async Task<ApiResult> GetAllAsync()
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
             try
             {
                 var result = await connection.QueryAsync<Department>("GetAllDepartments", commandType: CommandType.StoredProcedure);
-                return result.ToList();
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR);
             }
         }
     }
 
-    public async Task<Department?> GetByIdAsync(int id)
+    public async Task<ApiResult> GetByIdAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -111,17 +125,19 @@ public class DepartmentRepository : IDepartmentRepository
             try
             {
                 var result = await connection.QuerySingleOrDefaultAsync<Department>("GetDepartmentById", parameters, commandType: CommandType.StoredProcedure);
-                return result;
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR);
             }
         }
     }
 
-    public async Task UpdateAsync(Department department)
+    public async Task<ApiResult> UpdateAsync(Department department)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -140,10 +156,15 @@ public class DepartmentRepository : IDepartmentRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
+                    transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_DEPARTMENT_ERROR);
                 }
             }
         }

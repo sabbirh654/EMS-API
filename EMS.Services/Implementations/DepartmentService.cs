@@ -1,6 +1,8 @@
 ﻿using EMS.Core.DTOs;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
 using EMS.Core.Mappers;
+using EMS.Core.Models;
 using EMS.Repository.Interfaces;
 using EMS.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -18,75 +20,78 @@ public class DepartmentService : IDepartmentService
         _logger = logger;
     }
 
-    public async Task AddDepartment(AddUpdateDepartmentDto dto)
+    public async Task<ApiResult> AddDepartment(AddUpdateDepartmentDto dto)
     {
         Department department = dto.MapDepartmentAddUpdateDto();
 
         try
         {
-            await _departmentRepository.AddAsync(department);
+            return await _departmentRepository.AddAsync(department);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(DepartmentService)} at {nameof(AddDepartment)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentService), nameof(AddDepartment), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_DEPARTMENT_ERROR);
         }
     }
 
-    public async Task DeleteDepartment(int id)
+    public async Task<ApiResult> DeleteDepartment(int id)
     {
         try
         {
-            await _departmentRepository.DeleteAsync(id);
+            return await _departmentRepository.DeleteAsync(id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(DepartmentService)} at {nameof(DeleteDepartment)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentService), nameof(DeleteDepartment), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_DEPARTMENT_ERROR);
         }
     }
 
-    public async Task<IEnumerable<Department>?> GetAllDepartments()
+    public async Task<ApiResult> GetAllDepartments()
     {
         try
         {
-            var result = await _departmentRepository.GetAllAsync();
-            return result;
+            return await _departmentRepository.GetAllAsync();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(DepartmentService)} at {nameof(GetAllDepartments)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentService), nameof(GetAllDepartments), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR);
         }
     }
 
-    public async Task<Department?> GetDepartmentById(int id)
+    public async Task<ApiResult> GetDepartmentById(int id)
     {
         try
         {
-            var result = await _departmentRepository.GetByIdAsync(id);
-            return result;
+            return await _departmentRepository.GetByIdAsync(id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(DepartmentService)} at {nameof(GetDepartmentById)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentService), nameof(GetDepartmentById), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR);
         }
     }
 
-    public async Task UpdateDepartment(int id, AddUpdateDepartmentDto dto)
+    public async Task<ApiResult> UpdateDepartment(int id, AddUpdateDepartmentDto dto)
     {
         Department department = dto.MapDepartmentAddUpdateDto();
         department.Id = id;
 
         try
         {
-            await _departmentRepository.UpdateAsync(department);
+            return await _departmentRepository.UpdateAsync(department);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(DepartmentService)} at {nameof(UpdateDepartment)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentService), nameof(UpdateDepartment), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_DEPARTMENT_ERROR);
         }
     }
 }

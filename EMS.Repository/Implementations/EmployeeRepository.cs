@@ -1,8 +1,9 @@
 ﻿using Dapper;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using static EMS.Core.Enums;
 
@@ -29,7 +30,7 @@ public class EmployeeRepository : IEmployeeRepository
 
     private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.SqlServer);
 
-    public async Task AddAsync(Employee employee)
+    public async Task<ApiResult> AddAsync(Employee employee)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -55,17 +56,21 @@ public class EmployeeRepository : IEmployeeRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_EMPLOYEE_ERROR);
                 }
             }
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<ApiResult> DeleteAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -83,34 +88,40 @@ public class EmployeeRepository : IEmployeeRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_EMPLOYEE_ERROR);
                 }
             }
         }
     }
 
-    public async Task<IEnumerable<EmployeeDetails>?> GetAllAsync()
+    public async Task<ApiResult> GetAllAsync()
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
             try
             {
                 var result = await connection.QueryAsync<EmployeeDetails>("GetAllEmployees", commandType: CommandType.StoredProcedure);
-                return result.ToList();
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR);
             }
         }
     }
 
-    public async Task<EmployeeDetails?> GetByIdAsync(int id)
+    public async Task<ApiResult> GetByIdAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -121,17 +132,19 @@ public class EmployeeRepository : IEmployeeRepository
             try
             {
                 var result = await connection.QuerySingleOrDefaultAsync<EmployeeDetails>("GetEmployeeById", parameters, commandType: CommandType.StoredProcedure);
-                return result;
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR);
             }
         }
     }
 
-    public async Task UpdateAsync(Employee employee)
+    public async Task<ApiResult> UpdateAsync(Employee employee)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -154,11 +167,15 @@ public class EmployeeRepository : IEmployeeRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_EMPLOYEE_ERROR);
                 }
             }
         }

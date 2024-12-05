@@ -1,6 +1,8 @@
 ﻿using EMS.Core.DTOs;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
 using EMS.Core.Mappers;
+using EMS.Core.Models;
 using EMS.Repository.Interfaces;
 using EMS.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -18,35 +20,39 @@ public class EmployeeService : IEmployeeService
         _logger = logger;
     }
 
-    public async Task AddEmployee(AddEmployeeDto dto)
+    public async Task<ApiResult> AddEmployee(AddEmployeeDto dto)
     {
         Employee employee = dto.MapEmployeeAddDto();
 
         try
         {
-            await _employeeRepository.AddAsync(employee);
+            var apiResult = await _employeeRepository.AddAsync(employee);
+            return apiResult;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(AddEmployee)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeeService), nameof(AddEmployee), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_EMPLOYEE_ERROR);
         }
     }
 
-    public async Task DeleteEmployee(int id)
+    public async Task<ApiResult> DeleteEmployee(int id)
     {
         try
         {
-            await _employeeRepository.DeleteAsync(id);
+            var apiResult = await _employeeRepository.DeleteAsync(id);
+            return apiResult;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(DeleteEmployee)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeeService), nameof(DeleteEmployee), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_EMPLOYEE_ERROR);
         }
     }
 
-    public async Task<IEnumerable<EmployeeDetails>?> GetAllEmployees()
+    public async Task<ApiResult> GetAllEmployees()
     {
         try
         {
@@ -55,12 +61,13 @@ public class EmployeeService : IEmployeeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(GetAllEmployees)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeeService), nameof(GetAllEmployees), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR);
         }
     }
 
-    public async Task<EmployeeDetails?> GetEmployeeById(int id)
+    public async Task<ApiResult> GetEmployeeById(int id)
     {
         try
         {
@@ -69,24 +76,27 @@ public class EmployeeService : IEmployeeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(GetAllEmployees)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeeService), nameof(GetEmployeeById), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR);
         }
     }
 
-    public async Task UpdateEmployee(int id, UpdateEmployeeDto dto)
+    public async Task<ApiResult> UpdateEmployee(int id, UpdateEmployeeDto dto)
     {
         Employee employee = dto.MapEmployeeUpdateDto();
         employee.Id = id;
 
         try
         {
-            await _employeeRepository.UpdateAsync(employee);
+            var apiResult = await _employeeRepository.UpdateAsync(employee);
+            return apiResult;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(UpdateEmployee)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeeService), nameof(UpdateEmployee), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_EMPLOYEE_ERROR);
         }
     }
 }

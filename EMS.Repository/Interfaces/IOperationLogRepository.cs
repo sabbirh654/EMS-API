@@ -1,9 +1,10 @@
 ﻿using EMS.Core.Entities;
+using EMS.Core.Models;
 
 namespace EMS.Repository.Interfaces;
 
 public interface IOperationLogRepository
 {
-    Task AddLogAsync(OperationLog log);
-    Task<IEnumerable<OperationLog>?> GetFilteredLogs(LogFilter filter);
+    Task<ApiResult> AddLogAsync(OperationLog log);
+    Task<ApiResult> GetFilteredLogs(LogFilter filter);
 }

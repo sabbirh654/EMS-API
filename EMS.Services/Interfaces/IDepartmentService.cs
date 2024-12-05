@@ -1,13 +1,13 @@
 ﻿using EMS.Core.DTOs;
-using EMS.Core.Entities;
+using EMS.Core.Models;
 
 namespace EMS.Services.Interfaces;
 
 public interface IDepartmentService
 {
-    Task<IEnumerable<Department>?> GetAllDepartments();
-    Task<Department?> GetDepartmentById(int id);
-    Task AddDepartment(AddUpdateDepartmentDto dto);
-    Task UpdateDepartment(int id, AddUpdateDepartmentDto dto);
-    Task DeleteDepartment(int id);
+    Task<ApiResult> GetAllDepartments();
+    Task<ApiResult> GetDepartmentById(int id);
+    Task<ApiResult> AddDepartment(AddUpdateDepartmentDto dto);
+    Task<ApiResult> UpdateDepartment(int id, AddUpdateDepartmentDto dto);
+    Task<ApiResult> DeleteDepartment(int id);
 }

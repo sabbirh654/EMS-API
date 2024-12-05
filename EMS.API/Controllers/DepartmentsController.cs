@@ -1,6 +1,7 @@
 ﻿using EMS.API.Models;
 using EMS.Core.DTOs;
-using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,110 +12,124 @@ namespace EMS.API.Controllers
     public class DepartmentsController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
+        private readonly ILogger<DepartmentsController> _logger;
 
-        public DepartmentsController(IDepartmentService departmentService)
+        public DepartmentsController(IDepartmentService departmentService, ILogger<DepartmentsController> logger)
         {
             _departmentService = departmentService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Department>>> GetAllDepartments()
+        public async Task<IActionResult> GetAllDepartments()
         {
-            ApiResponse<List<Department>> apiResponse = new();
-
             try
             {
-                var data = await _departmentService.GetAllDepartments();
-                apiResponse.Success = true;
-                apiResponse.Result = data?.ToList();
+                var result = await _departmentService.GetAllDepartments();
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentsController), nameof(GetAllDepartments), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR));
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse<Department>> GetDepartmentById(int id)
+        public async Task<IActionResult> GetDepartmentById(int id)
         {
-            ApiResponse<Department> apiResponse = new();
-
             try
             {
-                var data = await _departmentService.GetDepartmentById(id);
-                apiResponse.Success = true;
-                apiResponse.Result = data;
+                var result = await _departmentService.GetDepartmentById(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentsController), nameof(GetDepartmentById), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DEPARTMENT_ERROR));
+            }
         }
 
         [HttpPost]
-        public async Task<ApiResponse<int>> AddDepartment([FromBody] AddUpdateDepartmentDto dto)
+        public async Task<IActionResult> AddDepartment([FromBody] AddUpdateDepartmentDto dto)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _departmentService.AddDepartment(dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _departmentService.AddDepartment(dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentsController), nameof(AddDepartment), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_DEPARTMENT_ERROR));
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse<int>> UpdateDepartment(int id, [FromBody] AddUpdateDepartmentDto dto)
+        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] AddUpdateDepartmentDto dto)
         {
             ApiResponse<int> apiResponse = new();
 
             try
             {
-                await _departmentService.UpdateDepartment(id, dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _departmentService.UpdateDepartment(id, dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentsController), nameof(UpdateDepartment), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_DEPARTMENT_ERROR));
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<int>> DeleteDepartment(int id)
+        public async Task<IActionResult> DeleteDepartment(int id)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _departmentService.DeleteDepartment(id);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _departmentService.DeleteDepartment(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(DepartmentsController), nameof(DeleteDepartment), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_DEPARTMENT_ERROR));
+            }
         }
     }
 }

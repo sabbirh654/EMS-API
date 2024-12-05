@@ -1,4 +1,6 @@
 ﻿using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
 using MongoDB.Driver;
@@ -31,15 +33,20 @@ public class OperationLogRepository : IOperationLogRepository
         _exceptionHandler = _handlerFactory.GetHandler(DatabaseType.MongoDb);
     }
 
-    public async Task AddLogAsync(OperationLog log)
+    public async Task<ApiResult> AddLogAsync(OperationLog log)
     {
         try
         {
             await _operationLogs.InsertOneAsync(log);
+
+            return ApiResultFactory.CreateSuccessResult();
+
         }
         catch (Exception ex)
         {
             _exceptionHandler?.Handle(ex);
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_LOG_ERROR);
         }
     }
 
@@ -56,7 +63,7 @@ public class OperationLogRepository : IOperationLogRepository
     //    }
     //}
 
-    public async Task<IEnumerable<OperationLog>?> GetFilteredLogs(LogFilter f)
+    public async Task<ApiResult> GetFilteredLogs(LogFilter f)
     {
         var filter = Builders<OperationLog>.Filter.And(
             Builders<OperationLog>.Filter.Eq(log => log.EntityId, f.id.ToString()),
@@ -68,12 +75,15 @@ public class OperationLogRepository : IOperationLogRepository
 
         try
         {
-            return await _operationLogs.Find(filter).Sort(sort).ToListAsync();
+            await _operationLogs.Find(filter).Sort(sort).ToListAsync();
+
+            return ApiResultFactory.CreateSuccessResult();
         }
         catch (Exception ex)
         {
             _exceptionHandler?.Handle(ex);
-            return null;
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_LOG_ERROR);
         }
     }
 }

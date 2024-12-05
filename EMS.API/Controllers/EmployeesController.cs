@@ -1,6 +1,6 @@
-﻿using EMS.API.Models;
-using EMS.Core.DTOs;
-using EMS.Core.Entities;
+﻿using EMS.Core.DTOs;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,110 +11,122 @@ namespace EMS.API.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private readonly ILogger<EmployeesController> _logger;
 
-        public EmployeesController(IEmployeeService employeeService)
+        public EmployeesController(IEmployeeService employeeService, ILogger<EmployeesController> logger)
         {
             _employeeService = employeeService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<EmployeeDetails>>> GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            ApiResponse<List<EmployeeDetails>> apiResponse = new();
-
             try
             {
-                var data = await _employeeService.GetAllEmployees();
-                apiResponse.Success = true;
-                apiResponse.Result = data?.ToList();
+                var result = await _employeeService.GetAllEmployees();
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeesController), nameof(GetAllEmployees), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR));
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse<EmployeeDetails>> GetEmployeeById(int id)
+        public async Task<IActionResult> GetEmployeeById(int id)
         {
-            ApiResponse<EmployeeDetails> apiResponse = new();
-
             try
             {
-                var data = await _employeeService.GetEmployeeById(id);
-                apiResponse.Success = true;
-                apiResponse.Result = data;
+                var result = await _employeeService.GetEmployeeById(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeesController), nameof(GetEmployeeById), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_EMPLOYEE_ERROR));
+            }
         }
 
         [HttpPost]
-        public async Task<ApiResponse<int>> AddEmployee([FromBody] AddEmployeeDto dto)
+        public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto dto)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _employeeService.AddEmployee(dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _employeeService.AddEmployee(dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeesController), nameof(AddEmployee), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_EMPLOYEE_ERROR));
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse<int>> UpdateEmployee(int id, [FromBody] UpdateEmployeeDto dto)
+        public async Task<IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeeDto dto)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _employeeService.UpdateEmployee(id, dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _employeeService.UpdateEmployee(id, dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeesController), nameof(UpdateEmployee), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_EMPLOYEE_ERROR));
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<int>> DeleteEmployee(int id)
+        public async Task<IActionResult> DeleteEmployee(int id)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _employeeService.DeleteEmployee(id);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _employeeService.DeleteEmployee(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(EmployeesController), nameof(DeleteEmployee), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_EMPLOYEE_ERROR));
+            }
         }
     }
 }

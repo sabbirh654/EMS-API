@@ -1,9 +1,9 @@
 ﻿using Dapper;
 using EMS.Core.Entities;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Logging;
 using System.Data;
 using static EMS.Core.Enums;
 
@@ -17,7 +17,7 @@ public class DesignationRepository : IDesignationRepository
     private IDatabaseExceptionHandler? _exceptionHandler;
 
     public DesignationRepository(
-        IDatabaseFactory databaseFactory, 
+        IDatabaseFactory databaseFactory,
         IOperationLogRepository operationLogRepository,
         IDatabaseExceptionHandlerFactory databaseExceptionHandlerFactory)
     {
@@ -30,7 +30,7 @@ public class DesignationRepository : IDesignationRepository
 
     private void OnInit() => _exceptionHandler = _databaseExceptionHandlerFactory.GetHandler(DatabaseType.SqlServer);
 
-    public async Task AddAsync(Designation designation)
+    public async Task<ApiResult> AddAsync(Designation designation)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -48,19 +48,23 @@ public class DesignationRepository : IDesignationRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_DESIGNATION_ERROR);
                 }
             }
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<ApiResult> DeleteAsync(int id)
     {
-        
+
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
             using (var transaction = connection.BeginTransaction())
@@ -77,34 +81,41 @@ public class DesignationRepository : IDesignationRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
-                catch (SqlException ex)
+                catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_DESIGNATION_ERROR);
                 }
             }
         }
     }
 
-    public async Task<IEnumerable<Designation>?> GetAllAsync()
+    public async Task<ApiResult> GetAllAsync()
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
             try
             {
                 var result = await connection.QueryAsync<Designation>("GetAllDesignations", commandType: CommandType.StoredProcedure);
-                return result.ToList();
+
+                return ApiResultFactory.CreateSuccessResult(result);
+
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DESIGNATION_ERROR);
             }
         }
     }
 
-    public async Task<Designation?> GetByIdAsync(int id)
+    public async Task<ApiResult> GetByIdAsync(int id)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -115,17 +126,19 @@ public class DesignationRepository : IDesignationRepository
             try
             {
                 var result = await connection.QuerySingleOrDefaultAsync<Designation>("GetDesignationById", parameters, commandType: CommandType.StoredProcedure);
-                return result;
+
+                return ApiResultFactory.CreateSuccessResult(result);
             }
             catch (Exception ex)
             {
                 _exceptionHandler?.Handle(ex);
-                return null;
+
+                return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_DESIGNATION_ERROR);
             }
         }
     }
 
-    public async Task UpdateAsync(Designation designation)
+    public async Task<ApiResult> UpdateAsync(Designation designation)
     {
         using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
         {
@@ -144,11 +157,15 @@ public class DesignationRepository : IDesignationRepository
                     await _operationLogRepository.AddLogAsync(log);
 
                     transaction.Commit();
+
+                    return ApiResultFactory.CreateSuccessResult();
                 }
-                catch (SqlException ex)
+                catch (Exception ex)
                 {
                     transaction.Rollback();
                     _exceptionHandler?.Handle(ex);
+
+                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_DESIGNATION_ERROR);
                 }
             }
         }

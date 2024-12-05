@@ -1,9 +1,9 @@
 ﻿using DnsClient.Internal;
 using EMS.Core.DTOs;
 using EMS.Core.Entities;
-using EMS.Core.Exceptions;
+using EMS.Core.Helpers;
 using EMS.Core.Mappers;
-using EMS.Repository.Implementations;
+using EMS.Core.Models;
 using EMS.Repository.Interfaces;
 using EMS.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -21,91 +21,83 @@ public class AttendanceService : IAttendanceService
         _logger = logger;
     }
 
-    public async Task AddAttendance(AddAttendanceDto dto)
+    public async Task<ApiResult> AddAttendance(AddAttendanceDto dto)
     {
         Attendance attendance = dto.MapAttendanceAddDto();
 
         try
         {
-            await _attendanceRepository.AddAsync(attendance);
-        }
-        catch (RepositoryException ex)
-        {
-            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(AddAttendance)} function");
-            throw new ServiceException(ex.Message, ex.ErrorCode);
+            return await _attendanceRepository.AddAsync(attendance);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(AddAttendance)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendanceService), nameof(AddAttendance), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_ATTENDANCE_ERROR);
         }
     }
 
-    public async Task DeleteAttendance(int id)
+    public async Task<ApiResult> DeleteAttendance(int id)
     {
         try
         {
-            await _attendanceRepository.DeleteAsync(id);
+            return await _attendanceRepository.DeleteAsync(id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(DeleteAttendance)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendanceService), nameof(DeleteAttendance), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_ATTENDANCE_ERROR);
         }
     }
 
-    public async Task<IEnumerable<Attendance>?> GetAllAttendance(AttendanceFilter filter)
+    public async Task<ApiResult> GetAllAttendance(AttendanceFilter filter)
     {
         try
         {
-            var result = await _attendanceRepository.GetAllAsync(filter);
-            return result;
+            return await _attendanceRepository.GetAllAsync(filter);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(GetAllAttendance)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendanceService), nameof(GetAllAttendance), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR);
         }
     }
 
-    public Task<Attendance?> GetAttendanceById(int id)
+    public Task<ApiResult> GetAttendanceById(int id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<AttendanceDetails>?> GetEmployeeAttendance(int employeeId)
+    public async Task<ApiResult> GetEmployeeAttendance(int employeeId)
     {
         try
         {
-            var result = await _attendanceRepository.GetAllByIdAsync(employeeId);
-            return result;
+            return await _attendanceRepository.GetAllByIdAsync(employeeId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(EmployeeService)} at {nameof(GetAllAttendance)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendanceService), nameof(GetEmployeeAttendance), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR);
         }
     }
 
-    public async Task UpdateAttendance(int id, UpdateAttendanceDto dto)
+    public async Task<ApiResult> UpdateAttendance(int id, UpdateAttendanceDto dto)
     {
         Attendance attendance = dto.MapAttendanceUpdateDto();
         attendance.Id = id;
 
         try
         {
-            await _attendanceRepository.UpdateAsync(attendance);
-        }
-        catch (RepositoryException ex)
-        {
-            _logger.LogError(ex, $"Service error in {nameof(AttendanceService)} at {nameof(AddAttendance)} function");
-            throw new ServiceException(ex.Message, ex.ErrorCode);
-            throw;
+            return await _attendanceRepository.UpdateAsync(attendance);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Service error in {nameof(AttendanceRepository)} at {nameof(UpdateAttendance)} function");
-            throw;
+            _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendanceService), nameof(UpdateAttendance), ex.Message));
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_ATTENDANCE_ERROR);
         }
     }
 }

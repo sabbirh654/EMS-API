@@ -1,7 +1,7 @@
-﻿using EMS.API.Models;
-using EMS.Core.DTOs;
+﻿using EMS.Core.DTOs;
 using EMS.Core.Entities;
-using EMS.Core.Exceptions;
+using EMS.Core.Helpers;
+using EMS.Core.Models;
 using EMS.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,122 +12,122 @@ namespace EMS.API.Controllers
     public class AttendancesController : ControllerBase
     {
         private readonly IAttendanceService _attendanceService;
+        private readonly ILogger<AttendancesController> _logger;
 
-        public AttendancesController(IAttendanceService attendanceService)
+        public AttendancesController(IAttendanceService attendanceService, ILogger<AttendancesController> logger)
         {
             _attendanceService = attendanceService;
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ApiResponse<List<Attendance>>> GetAllAttendance([FromQuery] AttendanceFilter filter)
+        public async Task<IActionResult> GetAllAttendance([FromQuery] AttendanceFilter filter)
         {
-            ApiResponse<List<Attendance>> apiResponse = new();
-
             try
             {
-                var data = await _attendanceService.GetAllAttendance(filter);
-                apiResponse.Success = true;
-                apiResponse.Result = data?.ToList();
+                var result = await _attendanceService.GetAllAttendance(filter);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendancesController), nameof(GetAllAttendance), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR));
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ApiResponse<List<AttendanceDetails>>> Get(int id)
+        public async Task<IActionResult> GetSingleEmployeeAttendance(int id)
         {
-            ApiResponse<List<AttendanceDetails>> apiResponse = new();
-
             try
             {
-                var data = await _attendanceService.GetEmployeeAttendance(id);
-                apiResponse.Success = true;
-                apiResponse.Result = data?.ToList();
+                var result = await _attendanceService.GetEmployeeAttendance(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendancesController), nameof(GetSingleEmployeeAttendance), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.GET_ATTENDANCE_ERROR));
+            }
         }
 
         [HttpPost]
-        public async Task<ApiResponse<int>> AddAttendance([FromBody] AddAttendanceDto dto)
+        public async Task<IActionResult> AddAttendance([FromBody] AddAttendanceDto dto)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _attendanceService.AddAttendance(dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
-            }
-            catch(ServiceException ex)
-            {
-                apiResponse.Success = false;
-                apiResponse.ErrorCode = ex.ErrorCode;
-                apiResponse.Message = ex.Message;
+                var result = await _attendanceService.AddAttendance(dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendancesController), nameof(AddAttendance), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.ADD_ATTENDANCE_ERROR));
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ApiResponse<int>> UpdateAttendance(int id, [FromBody] UpdateAttendanceDto dto)
+        public async Task<IActionResult> UpdateAttendance(int id, [FromBody] UpdateAttendanceDto dto)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _attendanceService.UpdateAttendance(id, dto);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
-            }
-            catch (ServiceException ex)
-            {
-                apiResponse.Success = false;
-                apiResponse.ErrorCode = ex.ErrorCode;
-                apiResponse.Message = ex.Message;
+                var result = await _attendanceService.UpdateAttendance(id, dto);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendancesController), nameof(UpdateAttendance), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_ATTENDANCE_ERROR));
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ApiResponse<int>> DeleteAttendance(int id)
+        public async Task<IActionResult> DeleteAttendance(int id)
         {
-            ApiResponse<int> apiResponse = new();
-
             try
             {
-                await _attendanceService.DeleteAttendance(id);
-                apiResponse.Success = true;
-                apiResponse.Result = 1;
+                var result = await _attendanceService.DeleteAttendance(id);
+
+                if (!result.IsSuccess)
+                {
+                    return StatusCode(result.ErrorCode, result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                apiResponse.Success = false;
-                apiResponse.Message = ex.Message;
-            }
+                _logger.LogError(ErrorMessage.GetErrorMessage(nameof(AttendancesController), nameof(DeleteAttendance), ex.Message));
 
-            return apiResponse;
+                return StatusCode(500, ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.DELETE_ATTENDANCE_ERROR));
+            }
         }
     }
 }

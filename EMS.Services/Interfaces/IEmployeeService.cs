@@ -1,13 +1,13 @@
 ﻿using EMS.Core.DTOs;
-using EMS.Core.Entities;
+using EMS.Core.Models;
 
 namespace EMS.Services.Interfaces;
 
 public interface IEmployeeService
 {
-    Task<IEnumerable<EmployeeDetails>?> GetAllEmployees();
-    Task<EmployeeDetails?> GetEmployeeById(int id);
-    Task AddEmployee(AddEmployeeDto employee);
-    Task UpdateEmployee(int id, UpdateEmployeeDto employee);
-    Task DeleteEmployee(int id);
+    Task<ApiResult> GetAllEmployees();
+    Task<ApiResult> GetEmployeeById(int id);
+    Task<ApiResult> AddEmployee(AddEmployeeDto employee);
+    Task<ApiResult> UpdateEmployee(int id, UpdateEmployeeDto employee);
+    Task<ApiResult> DeleteEmployee(int id);
 }

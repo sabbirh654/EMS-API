@@ -1,13 +1,13 @@
 ﻿using EMS.Core.DTOs;
-using EMS.Core.Entities;
+using EMS.Core.Models;
 
 namespace EMS.Services.Interfaces;
 
 public interface IDesignationService
 {
-    Task<IEnumerable<Designation>?> GetAllDesignations();
-    Task<Designation?> GetDesignationById(int id);
-    Task AddDesignation(AddUpdateDesignationDto dto);
-    Task UpdateDesignation(int id, AddUpdateDesignationDto dto);
-    Task DeleteDesignation(int id);
+    Task<ApiResult> GetAllDesignations();
+    Task<ApiResult> GetDesignationById(int id);
+    Task<ApiResult> AddDesignation(AddUpdateDesignationDto dto);
+    Task<ApiResult> UpdateDesignation(int id, AddUpdateDesignationDto dto);
+    Task<ApiResult> DeleteDesignation(int id);
 }

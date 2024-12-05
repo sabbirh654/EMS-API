@@ -1,14 +1,15 @@
 ﻿using EMS.Core.DTOs;
 using EMS.Core.Entities;
+using EMS.Core.Models;
 
 namespace EMS.Services.Interfaces;
 
 public interface IAttendanceService
 {
-    Task<IEnumerable<Attendance>?> GetAllAttendance(AttendanceFilter filter);
-    Task<IEnumerable<AttendanceDetails>?> GetEmployeeAttendance(int employeeId);
-    Task<Attendance?> GetAttendanceById(int id);
-    Task AddAttendance(AddAttendanceDto dto);
-    Task UpdateAttendance(int id, UpdateAttendanceDto dto);
-    Task DeleteAttendance(int id);
+    Task<ApiResult> GetAllAttendance(AttendanceFilter filter);
+    Task<ApiResult> GetEmployeeAttendance(int employeeId);
+    Task<ApiResult> GetAttendanceById(int id);
+    Task<ApiResult> AddAttendance(AddAttendanceDto dto);
+    Task<ApiResult> UpdateAttendance(int id, UpdateAttendanceDto dto);
+    Task<ApiResult> DeleteAttendance(int id);
 }
