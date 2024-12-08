@@ -42,7 +42,7 @@ public class DesignationRepository : IDesignationRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("AddNewDesignation", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("AddNewDesignation", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Add.ToString(), EntityName.Designation.ToString(), "", $"New designation has been added.");
                     await _operationLogRepository.AddLogAsync(log);
@@ -75,7 +75,7 @@ public class DesignationRepository : IDesignationRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("DeleteDesignation", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("DeleteDesignation", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Delete.ToString(), EntityName.Designation.ToString(), $"{id}", $"Designation has been deleted with Id = {id}");
                     await _operationLogRepository.AddLogAsync(log);
@@ -151,7 +151,7 @@ public class DesignationRepository : IDesignationRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("UpdateDesignation", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("UpdateDesignation", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Update.ToString(), EntityName.Designation.ToString(), $"{designation.Id}", $"Designation has been updated with Id = {designation.Id}");
                     await _operationLogRepository.AddLogAsync(log);

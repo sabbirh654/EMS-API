@@ -43,7 +43,7 @@ public class DepartmentRepository : IDepartmentRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("AddNewDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("AddNewDepartment", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Add.ToString(), EntityName.Department.ToString(), "", $"New department has been added.");
                     await _operationLogRepository.AddLogAsync(log);
@@ -75,7 +75,7 @@ public class DepartmentRepository : IDepartmentRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("DeleteDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("DeleteDepartment", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Delete.ToString(), EntityName.Department.ToString(), $"{id}", $"Department has been deleted with Id = {id}");
                     await _operationLogRepository.AddLogAsync(log);
@@ -150,7 +150,7 @@ public class DepartmentRepository : IDepartmentRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("UpdateDepartment", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("UpdateDepartment", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Update.ToString(), EntityName.Department.ToString(), $"{department.Id}", $"Department has been updated with Id = {department.Id}");
                     await _operationLogRepository.AddLogAsync(log);

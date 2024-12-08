@@ -42,12 +42,17 @@ namespace EMS.API.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetSingleEmployeeAttendance(int id)
+        [HttpGet("{employeeId}")]
+        public async Task<IActionResult> GetSingleEmployeeAttendance(int employeeId)
         {
+            if (employeeId <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
-                var result = await _attendanceService.GetEmployeeAttendance(id);
+                var result = await _attendanceService.GetEmployeeAttendance(employeeId);
 
                 if (!result.IsSuccess)
                 {
@@ -89,6 +94,11 @@ namespace EMS.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAttendance(int id, [FromBody] UpdateAttendanceDto dto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Attendance ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _attendanceService.UpdateAttendance(id, dto);
@@ -111,6 +121,11 @@ namespace EMS.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAttendance(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Attendance ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _attendanceService.DeleteAttendance(id);

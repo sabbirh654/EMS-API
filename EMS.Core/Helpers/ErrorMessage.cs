@@ -25,6 +25,8 @@ public static class ErrorMessage
     public const string ADD_LOG_ERROR = "Failed to add log";
     public const string GET_LOG_ERROR = "An error occured while fetching log data";
 
+    public const string VALIDATION_ERROR = "Validation failed. See errors for details.";
+
     public static string GetErrorMessage(string layerName, string methodName, string errorMessage)
     {
         return $"An error occured in {layerName} -> {methodName}.\n Error message: {errorMessage}";

@@ -45,7 +45,7 @@ public class AttendanceRepository : IAttendanceRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("insert_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("insert_attendance", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Add.ToString(), EntityName.Attendance.ToString(), "", $"New attendance has been added for employee id = {attendance.EmployeeId}");
                     await _operationLogRepository.AddLogAsync(log);
@@ -77,7 +77,7 @@ public class AttendanceRepository : IAttendanceRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("delete_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("delete_attendance", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Delete.ToString(), EntityName.Attendance.ToString(), $"{id}", $"Attendance has been deleted with Id = {id}");
                     await _operationLogRepository.AddLogAsync(log);
@@ -168,7 +168,7 @@ public class AttendanceRepository : IAttendanceRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("update_attendance", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("update_attendance", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Update.ToString(), EntityName.Attendance.ToString(), $"{attendance.Id}", $"Attendance has been updated for employee Id = {attendance.EmployeeId}");
                     await _operationLogRepository.AddLogAsync(log);

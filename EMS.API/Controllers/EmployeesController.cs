@@ -71,10 +71,6 @@ namespace EMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto dto)
         {
-            if(!ModelState.IsValid)
-            {
-
-            }
             try
             {
                 var result = await _employeeService.AddEmployee(dto);
@@ -97,6 +93,11 @@ namespace EMS.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeeDto dto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _employeeService.UpdateEmployee(id, dto);
@@ -119,6 +120,11 @@ namespace EMS.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _employeeService.DeleteEmployee(id);

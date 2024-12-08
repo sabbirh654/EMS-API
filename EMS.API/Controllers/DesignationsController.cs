@@ -1,6 +1,4 @@
-﻿using EMS.API.Models;
-using EMS.Core.DTOs;
-using EMS.Core.Entities;
+﻿using EMS.Core.DTOs;
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
@@ -46,6 +44,11 @@ namespace EMS.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDesignationById(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _designationService.GetDesignationById(id);
@@ -90,6 +93,11 @@ namespace EMS.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDesignation(int id, [FromBody] AddUpdateDesignationDto dto)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Designation ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _designationService.UpdateDesignation(id, dto);
@@ -112,9 +120,14 @@ namespace EMS.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDesignation(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Designation ID must be a positive integer."));
+            }
+
             try
             {
-                var result =  await _designationService.DeleteDesignation(id);
+                var result = await _designationService.DeleteDesignation(id);
 
                 if (!result.IsSuccess)
                 {

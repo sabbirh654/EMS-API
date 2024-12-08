@@ -82,7 +82,7 @@ public class EmployeeRepository : IEmployeeRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("DeleteEmployee", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("DeleteEmployee", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Delete.ToString(), EntityName.Employee.ToString(), $"{id}", $"Employee has been added with Id = {id}");
                     await _operationLogRepository.AddLogAsync(log);
@@ -161,7 +161,7 @@ public class EmployeeRepository : IEmployeeRepository
 
                 try
                 {
-                    await connection.ExecuteAsync("UpdateEmployee", parameters, commandType: CommandType.StoredProcedure);
+                    await connection.ExecuteAsync("UpdateEmployee", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                     OperationLog log = new(OperationType.Update.ToString(), EntityName.Employee.ToString(), $"{employee.Id}", $"Employee has been added with Id = {employee.Id}");
                     await _operationLogRepository.AddLogAsync(log);

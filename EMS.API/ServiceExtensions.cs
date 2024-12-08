@@ -1,4 +1,5 @@
-﻿using EMS.Repository.DatabaseProviders.Implementations;
+﻿using EMS.API.Filters;
+using EMS.Repository.DatabaseProviders.Implementations;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Implementations;
 using EMS.Repository.Interfaces;
@@ -35,7 +36,15 @@ public static class ServiceExtensions
 
     public static IServiceCollection RegisterFrameworkServices(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidationFilter>();
+        })
+        .ConfigureApiBehaviorOptions(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
+        });
+
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c => c.SupportNonNullableReferenceTypes());
 

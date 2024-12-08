@@ -1,5 +1,4 @@
-﻿using EMS.API.Models;
-using EMS.Core.DTOs;
+﻿using EMS.Core.DTOs;
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
@@ -45,6 +44,11 @@ namespace EMS.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDepartmentById(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Employee ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _departmentService.GetDepartmentById(id);
@@ -89,7 +93,10 @@ namespace EMS.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDepartment(int id, [FromBody] AddUpdateDepartmentDto dto)
         {
-            ApiResponse<int> apiResponse = new();
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Department ID must be a positive integer."));
+            }
 
             try
             {
@@ -113,6 +120,11 @@ namespace EMS.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
+            if (id <= 0)
+            {
+                return BadRequest(ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Department ID must be a positive integer."));
+            }
+
             try
             {
                 var result = await _departmentService.DeleteDepartment(id);
