@@ -4,6 +4,7 @@ using EMS.Core.Entities;
 using EMS.Core.Helpers;
 using EMS.Core.Mappers;
 using EMS.Core.Models;
+using EMS.Repository.Implementations;
 using EMS.Repository.Interfaces;
 using EMS.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -14,11 +15,13 @@ public class AttendanceService : IAttendanceService
 {
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly ILogger<AttendanceService> _logger;
+    private readonly IEmployeeRepository _employeeRepository;
 
-    public AttendanceService(IAttendanceRepository attendanceRepository, ILogger<AttendanceService> logger)
+    public AttendanceService(IAttendanceRepository attendanceRepository, ILogger<AttendanceService> logger, IEmployeeRepository employeeRepository)
     {
         _attendanceRepository = attendanceRepository;
         _logger = logger;
+        _employeeRepository = employeeRepository;
     }
 
     public async Task<ApiResult> AddAttendance(AddAttendanceDto dto)
@@ -27,6 +30,13 @@ public class AttendanceService : IAttendanceService
 
         try
         {
+            var employee = _employeeRepository.GetByIdAsync(dto.EmployeeId);
+
+            if (employee.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Employee not found or deleted to add attendance");
+            }
+
             return await _attendanceRepository.AddAsync(attendance);
         }
         catch (Exception ex)

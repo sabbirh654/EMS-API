@@ -13,11 +13,15 @@ public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _employeeRepository;
     private readonly ILogger<EmployeeService> _logger;
+    private readonly IDepartmentRepository _departmentRepository;
+    private readonly IDesignationRepository _designationRepository;
 
-    public EmployeeService(IEmployeeRepository employeeRepository, ILogger<EmployeeService>logger)
+    public EmployeeService(IEmployeeRepository employeeRepository, ILogger<EmployeeService>logger, IDepartmentRepository departmentRepository, IDesignationRepository designationRepository)
     {
         _employeeRepository = employeeRepository;
         _logger = logger;
+        _departmentRepository = departmentRepository;
+        _designationRepository = designationRepository;
     }
 
     public async Task<ApiResult> AddEmployee(AddEmployeeDto dto)
@@ -26,6 +30,20 @@ public class EmployeeService : IEmployeeService
 
         try
         {
+            var department = _departmentRepository.GetByIdAsync(employee.DepartmentId);
+
+            if (department.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Department not found or deleted");
+            }
+
+            var designation = _designationRepository.GetByIdAsync(employee.DesignationId);
+
+            if (designation.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Designation not found or deleted");
+            }
+
             var apiResult = await _employeeRepository.AddAsync(employee);
             return apiResult;
         }
@@ -41,6 +59,13 @@ public class EmployeeService : IEmployeeService
     {
         try
         {
+            var employee = _employeeRepository.GetByIdAsync(id);
+
+            if (employee.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Employee not found or deleted");
+            }
+
             var apiResult = await _employeeRepository.DeleteAsync(id);
             return apiResult;
         }
@@ -89,6 +114,13 @@ public class EmployeeService : IEmployeeService
 
         try
         {
+            var employeeTobeUpdated = _employeeRepository.GetByIdAsync(id);
+
+            if(employeeTobeUpdated.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Employee not found or deleted");
+            }
+
             var apiResult = await _employeeRepository.UpdateAsync(employee);
             return apiResult;
         }

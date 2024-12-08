@@ -27,6 +27,8 @@ public static class ErrorMessage
 
     public const string VALIDATION_ERROR = "Validation failed. See errors for details.";
 
+    public const string DEPARTMENT_NOT_FOUND = "The department you are trying to add is not found";
+
     public static string GetErrorMessage(string layerName, string methodName, string errorMessage)
     {
         return $"An error occured in {layerName} -> {methodName}.\n Error message: {errorMessage}";

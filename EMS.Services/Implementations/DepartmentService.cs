@@ -40,6 +40,13 @@ public class DepartmentService : IDepartmentService
     {
         try
         {
+            var department = _departmentRepository.GetByIdAsync(id);
+
+            if (department.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Department not found or deleted");
+            }
+
             return await _departmentRepository.DeleteAsync(id);
         }
         catch (Exception ex)
@@ -68,6 +75,13 @@ public class DepartmentService : IDepartmentService
     {
         try
         {
+            var department = _departmentRepository.GetByIdAsync(id);
+
+            if (department.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Department not found or deleted");
+            }
+
             return await _departmentRepository.GetByIdAsync(id);
         }
         catch (Exception ex)
@@ -85,6 +99,13 @@ public class DepartmentService : IDepartmentService
 
         try
         {
+            var dept = _departmentRepository.GetByIdAsync(id);
+
+            if (dept.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Department not found or deleted");
+            }
+
             return await _departmentRepository.UpdateAsync(department);
         }
         catch (Exception ex)

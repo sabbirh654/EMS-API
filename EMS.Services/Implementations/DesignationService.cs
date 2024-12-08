@@ -39,6 +39,13 @@ public class DesignationService : IDesignationService
     {
         try
         {
+            var designation = _designationRepository.GetByIdAsync(id);
+
+            if (designation.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Designation not found or deleted");
+            }
+
             return await _designationRepository.DeleteAsync(id);
         }
         catch (Exception ex)
@@ -67,6 +74,13 @@ public class DesignationService : IDesignationService
     {
         try
         {
+            var designation = _designationRepository.GetByIdAsync(id);
+
+            if (designation.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "designation not found or deleted");
+            }
+
             return await _designationRepository.GetByIdAsync(id);
         }
         catch (Exception ex)
@@ -84,6 +98,13 @@ public class DesignationService : IDesignationService
 
         try
         {
+            var des = _designationRepository.GetByIdAsync(id);
+
+            if (des.Result.Result == null)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.NOT_FOUND_ERROR, "Designation not found or deleted");
+            }
+
             return await _designationRepository.UpdateAsync(designation);
         }
         catch (Exception ex)
