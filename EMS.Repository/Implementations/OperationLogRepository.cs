@@ -75,9 +75,9 @@ public class OperationLogRepository : IOperationLogRepository
 
         try
         {
-            await _operationLogs.Find(filter).Sort(sort).ToListAsync();
+            var result = await _operationLogs.Find(filter).Sort(sort).ToListAsync();
 
-            return ApiResultFactory.CreateSuccessResult();
+            return ApiResultFactory.CreateSuccessResult(result);
         }
         catch (Exception ex)
         {

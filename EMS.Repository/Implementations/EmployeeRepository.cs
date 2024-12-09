@@ -1,10 +1,12 @@
 ﻿using Dapper;
+using EMS.Core.ChangeTrackers;
 using EMS.Core.Entities;
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Repository.DatabaseProviders.Interfaces;
 using EMS.Repository.Interfaces;
 using System.Data;
+using System.Linq;
 using static EMS.Core.Enums;
 
 namespace EMS.Repository.Implementations;
@@ -146,38 +148,46 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<ApiResult> UpdateAsync(Employee employee)
     {
-        using (IDbConnection connection = _databaseFactory.CreateSqlServerConnection())
+        using var connection = _databaseFactory.CreateSqlServerConnection();
+        using var transaction = connection.BeginTransaction();
+
+
+        DynamicParameters parameters = new();
+
+        parameters.Add("@Id", employee.Id);
+        parameters.Add("@Name", employee.Name);
+        parameters.Add("@Email", employee.Email);
+        parameters.Add("@Phone", employee.PhoneNumber);
+        parameters.Add("@DOB", employee.BirthDate);
+        parameters.Add("@Address", employee.Address);
+
+
+
+        try
         {
-            using (var transaction = connection.BeginTransaction())
+            var existingEmployee = await GetByIdAsync(employee.Id);
+            var updatedFields = EmployeeChangeTracker.GetUpdatedFields(existingEmployee.Result, employee);
+
+            if (updatedFields.Count == 0)
             {
-                DynamicParameters parameters = new();
-
-                parameters.Add("@Id", employee.Id);
-                parameters.Add("@Name", employee.Name);
-                parameters.Add("@Email", employee.Email);
-                parameters.Add("@Phone", employee.PhoneNumber);
-                parameters.Add("@DOB", employee.BirthDate);
-                parameters.Add("@Address", employee.Address);
-
-                try
-                {
-                    await connection.ExecuteAsync("UpdateEmployee", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
-
-                    OperationLog log = new(OperationType.Update.ToString(), EntityName.Employee.ToString(), $"{employee.Id}", $"Employee has been added with Id = {employee.Id}");
-                    await _operationLogRepository.AddLogAsync(log);
-
-                    transaction.Commit();
-
-                    return ApiResultFactory.CreateSuccessResult();
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _exceptionHandler?.Handle(ex);
-
-                    return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_EMPLOYEE_ERROR);
-                }
             }
+
+            await connection.ExecuteAsync("UpdateEmployee", parameters, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+            string changes = string.Join(Environment.NewLine, updatedFields);
+            OperationLog log = new(OperationType.Update.ToString(), EntityName.Employee.ToString(), $"{employee.Id}", $"Employee updated\n. Changes:\n {changes}");
+            await _operationLogRepository.AddLogAsync(log);
+
+            transaction.Commit();
+
+            return ApiResultFactory.CreateSuccessResult();
+        }
+        catch (Exception ex)
+        {
+            transaction.Rollback();
+            _exceptionHandler?.Handle(ex);
+
+            return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_EMPLOYEE_ERROR);
         }
     }
 }
