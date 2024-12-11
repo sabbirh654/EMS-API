@@ -187,4 +187,20 @@ public class AttendanceRepository : IAttendanceRepository
             }
         }
     }
+
+    private bool CheckOverlappingInterval(List<Attendance> data, TimeSpan newCheckInTime, TimeSpan newCheckOutTime)
+    {
+        for (int i = 0; i < data?.Count; i++)
+        {
+            TimeSpan maxCheckInTime = data[i].CheckInTime > newCheckInTime ? data[i].CheckInTime : newCheckInTime;
+            TimeSpan minCheckOutTime = data[i].CheckOutTime < newCheckOutTime ? data[i].CheckOutTime : newCheckOutTime;
+
+            if (maxCheckInTime <= minCheckOutTime)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

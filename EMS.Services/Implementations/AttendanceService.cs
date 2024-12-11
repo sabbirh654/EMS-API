@@ -4,7 +4,6 @@ using EMS.Core.Entities;
 using EMS.Core.Helpers;
 using EMS.Core.Mappers;
 using EMS.Core.Models;
-using EMS.Repository.Implementations;
 using EMS.Repository.Interfaces;
 using EMS.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -26,6 +25,27 @@ public class AttendanceService : IAttendanceService
 
     public async Task<ApiResult> AddAttendance(AddAttendanceDto dto)
     {
+        AttendanceFilter filter = new();
+        filter.EmployeeId = dto.EmployeeId;
+        filter.Date = dto.Date;
+
+        var res = _attendanceRepository.GetAllAsync(filter);
+
+        if (res.Result != null)
+        {
+            var data = res.Result.Result as List<Attendance>;
+
+            var newCheckInTime = dto.CheckInTime;
+            var newCheckOutTime = dto.CheckOutTime;
+
+            bool isOverlap = CheckOverlappingInterval(data, newCheckInTime, newCheckOutTime);
+
+            if (isOverlap)
+            {
+                return ApiResultFactory.CreateErrorResult(ErrorCode.VALIDATION_ERROR, "Attendance time overlaps with existing time");
+            }
+        }
+
         Attendance attendance = dto.MapAttendanceAddDto();
 
         try
@@ -109,5 +129,26 @@ public class AttendanceService : IAttendanceService
 
             return ApiResultFactory.CreateErrorResult(ErrorCode.INTERNAL_SERVER_ERROR, ErrorMessage.UPDATE_ATTENDANCE_ERROR);
         }
+    }
+
+    private bool CheckOverlappingInterval(List<Attendance> data, TimeSpan newCheckInTime, TimeSpan newCheckOutTime, int? attendanceId = null)
+    {
+        for (int i = 0; i < data?.Count; i++)
+        {
+            if(attendanceId != null && data[i].Id == attendanceId)
+            {
+                continue;
+            }
+
+            TimeSpan maxCheckInTime = data[i].CheckInTime > newCheckInTime ? data[i].CheckInTime : newCheckInTime;
+            TimeSpan minCheckOutTime = data[i].CheckOutTime < newCheckOutTime ? data[i].CheckOutTime : newCheckOutTime;
+
+            if (maxCheckInTime <= minCheckOutTime)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
