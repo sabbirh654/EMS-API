@@ -4,6 +4,7 @@ using EMS.Core.Entities;
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
@@ -23,6 +24,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllEmployees()
         {
             try

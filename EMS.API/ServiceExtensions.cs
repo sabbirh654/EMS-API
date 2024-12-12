@@ -29,6 +29,8 @@ public static class ServiceExtensions
         services.AddScoped<PostgreSqlExceptionHandler>();
         services.AddScoped<MongoDbExceptionHandler>();
 
+        services.AddScoped<ITokenService, TokenService>();
+
         services.AddScoped<IDatabaseExceptionHandlerFactory, DatabaseExceptionHandlerFactory>();
 
         return services;

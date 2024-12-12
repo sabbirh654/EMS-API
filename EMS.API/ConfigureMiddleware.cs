@@ -8,6 +8,7 @@ public static class ConfigureMiddleware
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            app.UseDeveloperExceptionPage();
         }
 
         app.UseHttpsRedirection();
@@ -17,6 +18,7 @@ public static class ConfigureMiddleware
                    .AllowAnyMethod()
                    .AllowAnyHeader());
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         return app;
