@@ -17,6 +17,7 @@ public static class ServiceExtensions
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IAttendanceRepository, AttendanceRepository>();
         services.AddScoped<IOperationLogRepository, OperationLogRepository>();
+        services.AddScoped<ILoginRepository, LoginRepository>();
 
         services.AddSingleton<IDatabaseFactory, DatabaseFactory>();
 
@@ -24,6 +25,7 @@ public static class ServiceExtensions
         services.AddScoped<IDesignationService, DesignationService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
         services.AddScoped<IAttendanceService, AttendanceService>();
+        services.AddScoped<ILoginService, LoginService>();
 
         services.AddScoped<SqlServerExceptionHandler>();
         services.AddScoped<PostgreSqlExceptionHandler>();

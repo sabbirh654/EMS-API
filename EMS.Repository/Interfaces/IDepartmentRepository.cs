@@ -2,6 +2,6 @@
 
 namespace EMS.Repository.Interfaces;
 
-public interface IDepartmentRepository : IGenericGetRepository<Department>, IGenericPostRepository<Department>
+public interface IDepartmentRepository : IGenericRepository<Department>
 {
 }

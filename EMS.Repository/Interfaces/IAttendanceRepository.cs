@@ -3,7 +3,7 @@ using EMS.Core.Models;
 
 namespace EMS.Repository.Interfaces;
 
-public interface IAttendanceRepository : IGenericGetRepository<Attendance>, IGenericPostRepository<Attendance>
+public interface IAttendanceRepository : IGenericRepository<Attendance>
 {
     Task<ApiResult> GetAllAsync(AttendanceFilter filter);
     Task<ApiResult> GetAllByIdAsync(int id);

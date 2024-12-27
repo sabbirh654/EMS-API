@@ -2,6 +2,6 @@
 
 namespace EMS.Repository.Interfaces;
 
-public interface IEmployeeRepository : IGenericGetRepository<EmployeeDetails>, IGenericPostRepository<Employee>
+public interface IEmployeeRepository : IGenericRepository<Employee>
 {
 }

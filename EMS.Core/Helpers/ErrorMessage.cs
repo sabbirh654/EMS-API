@@ -1,4 +1,6 @@
-﻿namespace EMS.Core.Helpers;
+﻿using System.Reflection.Metadata;
+
+namespace EMS.Core.Helpers;
 
 public static class ErrorMessage
 {
@@ -28,6 +30,12 @@ public static class ErrorMessage
     public const string VALIDATION_ERROR = "Validation failed. See errors for details.";
 
     public const string DEPARTMENT_NOT_FOUND = "The department you are trying to add is not found";
+
+    public const string GET_REGISTER_INFO_ERROR = "An error occured while fetching register info";
+    public const string USER_ALREADY_EXISTS = "User already exists. Try to login";
+    public const string REGISTER_USER_ERROR = "An error occured while registering";
+    public const string WRONG_USER_NAME_OR_PASSWORD = "Wrong username or password has been inserted";
+
 
     public static string GetErrorMessage(string layerName, string methodName, string errorMessage)
     {

@@ -24,7 +24,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> GetAllEmployees()
         {
             try

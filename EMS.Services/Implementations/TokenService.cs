@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace EMS.Services.Implementations;
@@ -17,7 +18,16 @@ public class TokenService : ITokenService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateToken(string username, IList<string> roles)
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+
+        return Convert.ToBase64String(randomNumber);
+    }
+
+    public string GenerateToken(string username, IList<string> roles = null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
@@ -27,7 +37,7 @@ public class TokenService : ITokenService
             new Claim(ClaimTypes.Name, username)
         };
 
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        //claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -39,7 +49,11 @@ public class TokenService : ITokenService
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        var x = tokenHandler.WriteToken(token);
         return tokenHandler.WriteToken(token);
+    }
+
+    public DateTime GetRefreshTokenExpiry()
+    {
+        return DateTime.Now.AddMinutes(_jwtSettings.RefreshTokenExpiryMinutes);
     }
 }
