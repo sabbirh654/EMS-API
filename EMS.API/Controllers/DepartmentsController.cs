@@ -2,6 +2,7 @@
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.API.Controllers
@@ -20,6 +21,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllDepartments()
         {
             try
@@ -42,6 +44,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetDepartmentById(int id)
         {
             if (id <= 0)
@@ -69,6 +72,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddDepartment([FromBody] AddUpdateDepartmentDto dto)
         {
             try
@@ -91,6 +95,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateDepartment(int id, [FromBody] AddUpdateDepartmentDto dto)
         {
             if (id <= 0)
@@ -118,6 +123,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             if (id <= 0)

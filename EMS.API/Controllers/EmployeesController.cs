@@ -47,6 +47,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
             if (id <= 0)
@@ -74,6 +75,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("download-xlsx")]
+        [Authorize]
         public async Task<IActionResult> GetEmployeeDataAsXlsxFile()
         {
             var res = await _employeeService.GetAllEmployees();
@@ -113,6 +115,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("download-csv")]
+        [Authorize]
         public async Task<IActionResult> GetEmployeeDataAsCsvFile()
         {
             var res = await _employeeService.GetAllEmployees();
@@ -133,6 +136,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto dto)
         {
             try
@@ -155,6 +159,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeeDto dto)
         {
             if (id <= 0)
@@ -182,6 +187,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             if (id <= 0)

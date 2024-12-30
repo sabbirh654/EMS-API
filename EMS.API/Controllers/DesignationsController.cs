@@ -2,6 +2,7 @@
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.API.Controllers
@@ -20,6 +21,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllDesignations()
         {
             try
@@ -42,6 +44,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetDesignationById(int id)
         {
             if (id <= 0)
@@ -69,6 +72,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddDesignation([FromBody] AddUpdateDesignationDto dto)
         {
             try
@@ -91,6 +95,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateDesignation(int id, [FromBody] AddUpdateDesignationDto dto)
         {
             if (id <= 0)
@@ -118,6 +123,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteDesignation(int id)
         {
             if (id <= 0)

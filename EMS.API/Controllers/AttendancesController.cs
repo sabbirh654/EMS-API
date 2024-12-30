@@ -3,6 +3,7 @@ using EMS.Core.Entities;
 using EMS.Core.Helpers;
 using EMS.Core.Models;
 using EMS.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.API.Controllers
@@ -21,6 +22,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetAllAttendance([FromQuery] AttendanceFilter filter)
         {
             try
@@ -43,6 +45,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpGet("{employeeId}")]
+        [Authorize]
         public async Task<IActionResult> GetSingleEmployeeAttendance(int employeeId)
         {
             if (employeeId <= 0)
@@ -70,6 +73,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddAttendance([FromBody] AddAttendanceDto dto)
         {
             try
@@ -92,6 +96,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAttendance(int id, [FromBody] UpdateAttendanceDto dto)
         {
             if (id <= 0)
@@ -119,6 +124,7 @@ namespace EMS.API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAttendance(int id)
         {
             if (id <= 0)
