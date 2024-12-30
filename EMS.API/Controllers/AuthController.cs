@@ -1,7 +1,6 @@
 ﻿using EMS.Core.DTOs;
 using EMS.Core.Helpers;
 using EMS.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EMS.API.Controllers
@@ -10,38 +9,6 @@ namespace EMS.API.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        #region commented
-        //private readonly ITokenService _tokenService;
-        //private readonly ILoginService _loginService;
-
-        //public AuthController(ILoginService loginservice, ITokenService tokenService)
-        //{
-        //    _tokenService = tokenService;
-        //    _loginService = loginservice;
-        //}
-
-        //[HttpPost("login")]
-        //public IActionResult Login([FromBody] Login request)
-        //{
-        //    // Validate user (mocked for demo purposes)
-        //    if (request.UserName == "admin" && request.Password == "password")
-        //    {
-        //        var roles = new List<string> { "Admin", "User" };
-        //        var token = _tokenService.GenerateToken(request.UserName, roles);
-        //        return Ok(new { Token = token });
-        //    }
-
-        //    return Unauthorized();
-        //}
-
-        //[HttpPost("Register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterOrLoginDto dto)
-        //{
-        //    var result = await _loginService.RegisterUserAsync(dto);
-        //    return Ok(result);
-        //}
-        #endregion
-
         private readonly ILoginService _loginService;
         private readonly ITokenService _tokenService;
         private readonly ILogger<AuthController> _logger;
@@ -94,10 +61,9 @@ namespace EMS.API.Controllers
         }
 
         [HttpPost("logout")]
-        [Authorize]
         public async Task<IActionResult> Logout([FromBody] LogoutDto logoutDto)
         {
-            var res = _loginService.DeleteRefreshToken(logoutDto); 
+            var res = await _loginService.DeleteRefreshToken(logoutDto);
             return Ok(res.Result);
         }
     }
